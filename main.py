@@ -3,6 +3,7 @@ import open3d as o3d
 from src.utility import fit_to_unit_sphere
 from src.mesh_constructor import MeshConstructor
 from src.plane_constructor import PlaneConstructor
+from src.points_constructor import PointsConstructor
 from src.constants import *
 
 mesh = o3d.io.read_triangle_mesh("models/DuckMesh.ply")
@@ -24,8 +25,9 @@ class Window:
         meshConstructor = MeshConstructor(self.vis, self.mesh)
         self.vis.register_key_action_callback(next_key, meshConstructor)
         planeConstructor = PlaneConstructor(self.vis, meshConstructor.mesh)
+        pointsConstructor = PointsConstructor(self.vis, meshConstructor.mesh, planeConstructor.plane)
         meshConstructor.next_animation = planeConstructor
-        planeConstructor.next_animation = planeConstructor
+        planeConstructor.next_animation = pointsConstructor
                 
         self.vis.run()
         self.vis.destroy_window()

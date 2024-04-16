@@ -3,11 +3,10 @@ from open3d.visualization import Visualizer, VisualizerWithKeyCallback
 import numpy as np
 
 from .callback import Callback
-from . import utility
 
 class PlaneConstructor(Callback):
-    def __init__(self, vis: Visualizer | VisualizerWithKeyCallback, mesh, *args, **kwargs) -> None:
-        super().__init__(vis, *args, **kwargs)
+    def __init__(self, vis: Visualizer | VisualizerWithKeyCallback, mesh) -> None:
+        super().__init__(vis)
         self.mesh = mesh
 
         self.camera = self.vis.get_view_control()
@@ -32,10 +31,9 @@ class PlaneConstructor(Callback):
         self.vis.remove_geometry(self.plane, reset_bounding_box=False)
         
         self.points = np.array([self.start1, self.start2, self.start1, self.start2])
-        self.plane = o3d.geometry.TriangleMesh(
-            o3d.utility.Vector3dVector(self.points),
-            o3d.utility.Vector3iVector([[1, 2, 0], [3, 2, 1]])
-        )
+        self.plane.vertices = o3d.utility.Vector3dVector(self.points)
+        self.plane.triangles = o3d.utility.Vector3iVector([[0, 1, 2], [3, 2, 1]])
+        
         self.plane.paint_uniform_color([0.8, 0.8, 0.8])
         
         self.vis.add_geometry(self.plane, reset_bounding_box=False)

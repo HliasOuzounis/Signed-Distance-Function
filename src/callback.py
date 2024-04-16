@@ -6,7 +6,7 @@ from .constants import *
 
 
 class Callback(ABC):
-    def __init__(self, vis: Visualizer|VisualizerWithKeyCallback, *args, **kwargs) -> None:
+    def __init__(self, vis: Visualizer|VisualizerWithKeyCallback) -> None:
         self.vis = vis
         self._next_animation = empty_call
 
