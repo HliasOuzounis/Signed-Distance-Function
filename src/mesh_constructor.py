@@ -15,28 +15,26 @@ class MeshConstructor(Callback):
         self.shuffle = True # shuffle the triangles
 
         self.mesh_triangles = np.asarray(self.mesh.triangles)
-        self.mesh.triangles = o3d.utility.Vector3iVector([self.mesh_triangles[0]])
-        self.step = self.mesh_triangles.shape[0] // 200
+        self.step = self.mesh_triangles.shape[0] // 100
+
+        self.animate_init()
 
         self.vis.add_geometry(self.mesh)
 
-    def __call__(self, vis: Visualizer | VisualizerWithKeyCallback, key: int | None = None, action: int | None = None) -> bool:
-        if key is not None and key != 1:
-            return False
-
+        
+    def animate_init(self) -> None:
         self.index = 0
         if self.shuffle: 
             np.random.shuffle(self.mesh_triangles)
-
+        # self.mesh.triangles = o3d.utility.Vector3iVector([[0, 0, 0]])
         self.mesh.triangles = o3d.utility.Vector3iVector([self.mesh_triangles[0]])
 
-        return super().__call__(vis, key, action)
 
     def animate(self, _vis):
         self.index += self.step
         self.mesh.triangles = o3d.utility.Vector3iVector(self.mesh_triangles[:self.index + 1])
 
-        if self.index >= len(self.mesh_triangles):
+        if self.index > len(self.mesh_triangles):
             self.stop_animate()
 
         return True

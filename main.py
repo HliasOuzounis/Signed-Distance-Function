@@ -2,6 +2,7 @@ import open3d as o3d
 
 from src.utility import fit_to_unit_sphere
 from src.mesh_constructor import MeshConstructor
+from src.plane_constructor import PlaneConstructor
 from src.constants import *
 
 mesh = o3d.io.read_triangle_mesh("models/DuckMesh.ply")
@@ -11,9 +12,7 @@ print(f"Triangles: {len(mesh.triangles)}")
 class Window:
     def __init__(self, mesh) -> bool:
         super().__init__()
-        self.mesh = fit_to_unit_sphere(mesh)
-        self.i = 0
-        self.sign = 1
+        self.mesh = mesh
 
         self.vis = o3d.visualization.VisualizerWithKeyCallback()
         self.init_window()
@@ -24,7 +23,9 @@ class Window:
         
         meshConstructor = MeshConstructor(self.vis, self.mesh)
         self.vis.register_key_action_callback(next_key, meshConstructor)
-        meshConstructor.next_animation = meshConstructor
+        planeConstructor = PlaneConstructor(self.vis, meshConstructor.mesh)
+        meshConstructor.next_animation = planeConstructor
+        planeConstructor.next_animation = planeConstructor
                 
         self.vis.run()
         self.vis.destroy_window()

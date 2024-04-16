@@ -28,16 +28,24 @@ class Callback(ABC):
         if key is not None and key != 1:
             return False
 
+        self.animate_init()
         self.vis.register_animation_callback(self.animate)
         
-        return False
+        return True
     
     def stop_animate(self):
         """
         Function to stop the animation.
         """
         self.vis.register_animation_callback(None)
-        self.vis.register_key_action_callback(next_key, self.next_animation)
+        self.vis.register_key_action_callback(next_key, self.next_animation)\
+    
+    def animate_init(self) -> None:
+        """
+        Initialize the animation. Will be called when __call__ is called.
+        """
+        return
+        
 
     @abstractmethod
     def animate(self, vis):
@@ -62,5 +70,5 @@ class Callback(ABC):
         
 
 
-def empty_call(vis):
+def empty_call(vis, *args):
     return False
