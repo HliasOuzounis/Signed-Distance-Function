@@ -1,24 +1,22 @@
 import open3d as o3d
 import numpy as np
 
+from vvrpywork.shapes import Mesh3D
+
 def fit_to_unit_sphere(data):
     """
     Centers and scales the vertices of a mesh or point cloud to fit within a unit sphere.
 
     Parameters:
-    - data: Open3D TriangleMesh or PointCloud object
+    - data: Mesh3D
 
     Returns:
     - normalized_data: Open3D TriangleMesh or PointCloud object with centered and scaled vertices/points
     """
-    if isinstance(data, o3d.geometry.TriangleMesh):
-        # For a mesh, normalize the vertices
-        vertices = np.asarray(data.vertices)
-    elif isinstance(data, o3d.geometry.PointCloud):
-        # For a point cloud, normalize the points
-        vertices = np.asarray(data.points)
+    if isinstance(data, Mesh3D):
+        vertices = data.vertices
     else:
-        raise ValueError("Input must be either an Open3D TriangleMesh or PointCloud object.")
+        raise ValueError("Input must be Mesh3D object.")
 
     # Scale the vertices/points to fit within a unit sphere
     center_point = np.mean(vertices, axis=0)
@@ -27,12 +25,7 @@ def fit_to_unit_sphere(data):
     vertices_normalized = vertices / max_distance
 
     # Update the vertices/points of the input data with the normalized vertices/points
-    if isinstance(data, o3d.geometry.TriangleMesh):
-        # For a mesh, update the vertices attribute
-        data.vertices = o3d.utility.Vector3dVector(vertices_normalized)
-    elif isinstance(data, o3d.geometry.PointCloud):
-        # For a point cloud, update the points attribute
-        data.points = o3d.utility.Vector3dVector(vertices_normalized)
+    data.vertices = vertices_normalized
 
     return data
 
@@ -42,25 +35,19 @@ def assign_colors(data):
     Assigns random colors to the vertices of a mesh or point cloud based on the distance of the vertices from the axis.
 
     Parameters:
-    - data: Open3D TriangleMesh or PointCloud object
+    - data: Mesh3D object
 
     Returns:
-    - colored_data: Open3D TriangleMesh or PointCloud object with random vertex colors
+    - colored_data: numpy array of RGB colors assigned to each vertex
     """
-
-    if isinstance(data, o3d.geometry.TriangleMesh):
-        # For a mesh, assign colors to the vertices
-        vertices = np.asarray(data.vertices)
-    elif isinstance(data, o3d.geometry.PointCloud):
-        # For a point cloud, assign colors to the points
-        vertices = np.asarray(data.points)
+    if isinstance(data, Mesh3D):
+        vertices = data.vertices
+        data.use_material = False
     else:
-        raise ValueError("Input must be either an Open3D TriangleMesh or PointCloud object.")
+        raise ValueError("Input must be Mesh3D object.")
 
     colors = np.zeros_like(vertices)
     colors[:, 0] = np.absolute(vertices[:, 0])
     colors[:, 2] = np.absolute(vertices[:, 2])
-    
-    colors = o3d.utility.Vector3dVector(colors)
 
     return colors

@@ -396,11 +396,8 @@ class Scene3D:
             shape = self._shapeDict[name]
             self.removeShape(name)
             self.addShape(shape, name, quick)
-
-
             
             
-
     def removeShape(self, name):
         if self.scene_widget.scene.has_geometry(name):
             self.scene_widget.scene.remove_geometry(name)

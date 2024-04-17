@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from open3d.visualization.gui import Window # type: ignore
+from vvrpywork.scene import Scene3D
 
 from .constants import *
-from ..main import SequenceHandler
+from .sequence_handler import SequenceHandler, empty_call
 
 
 class Callback(ABC):
@@ -11,7 +11,7 @@ class Callback(ABC):
         self._next_animation = empty_call
         self.l = 0
 
-    def __call__(self, sequence: SequenceHandler, window: Window) -> None:
+    def __call__(self, sequence: SequenceHandler, scene: Scene3D) -> None:
         """
         The callback function that will be called when in the callback loop or when the key is pressed.
         Override if more complex functionality is needed.
@@ -21,14 +21,14 @@ class Callback(ABC):
             - key: State of the key if it was pressed
             - action: Additional mods (ctrl, shift, etc.) if the key was pressed
         """
+        self.sequence = sequence
+        self.scene = scene
 
         self.animate_init()
-        window.set_on_tick(self.animate)
+        self.scene.window.set_on_tick_event(self.animate)
         sequence.next_animation = self.skip
-        sequence.curr_animation = self.animate
+        sequence.curr_animation = self
         
-        self.window = window
-        self.sequence = sequence
 
     def animate_init(self) -> None:
         """
@@ -36,15 +36,15 @@ class Callback(ABC):
         """
         return
 
-    def stop_animate(self, sequence: SequenceHandler, window: Window) -> None:
+    def stop_animate(self, sequence: SequenceHandler, scene: Scene3D) -> None:
         """
         Function to stop the animation.
         """
 
-        window.set_on_tick(None)
+        scene.window.set_on_tick_event(None)
         sequence.next_animation = self.next_animation
 
-    def skip(self, _sequence: SequenceHandler, _window: Window) -> None:
+    def skip(self, _sequence: SequenceHandler, _scene: Scene3D) -> None:
         """
         Skip the current animation
         """
@@ -52,10 +52,13 @@ class Callback(ABC):
         return
 
     @abstractmethod
-    def animate(self):
+    def animate(self) -> bool:
         """
         The animation function that will be put in the callback loop after the key is pressed.
         Needs to have an end condition and call self.stop_animate to stop the animation.
+
+        Returns:
+            - bool: True if a redraw is needed, False otherwise
         """
         raise NotImplementedError("Animation not implemented")
 
@@ -71,7 +74,3 @@ class Callback(ABC):
         if not isinstance(next, Callback):
             raise TypeError("next_animation must be a Callback object")
         self._next_animation = next
-
-
-def empty_call(window, *args):
-    return False

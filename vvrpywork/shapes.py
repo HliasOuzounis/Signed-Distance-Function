@@ -2888,6 +2888,7 @@ class Mesh3D(ShapeSet):
             self._shape.compute_vertex_normals()
         if not self._shape.has_triangle_normals():
             self._shape.compute_triangle_normals()
+        self.use_material = True
 
     def _addToScene(self, scene:Scene3D, name:None|str):
         name = str(id(self)) if name is None else name
@@ -2896,7 +2897,10 @@ class Mesh3D(ShapeSet):
             self._shape.compute_triangle_normals()
         if not self._shape.has_triangle_normals():
             self._shape.compute_triangle_normals()
-        scene.scene_widget.scene.add_geometry(name, self._shape, self._material)
+        if self.use_material:
+            scene.scene_widget.scene.add_geometry(name, self._shape, self._material)
+        else:
+            scene.scene_widget.scene.add_geometry(name, self._shape)
 
     def _update(self, name:str, scene:Scene3D):
         scene.removeShape(name)
