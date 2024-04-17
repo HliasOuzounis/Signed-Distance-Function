@@ -1,36 +1,51 @@
-import open3d as o3d
-from open3d.visualization import Visualizer, VisualizerWithKeyCallback
 import numpy as np
 
+from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
+
 from .callback import Callback
-from . import utility
+
 
 class PointsConstructor(Callback):
-    def __init__(self, vis: Visualizer | VisualizerWithKeyCallback, mesh, plane) -> None:
-        super().__init__(vis)
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
+        super().__init__()
         
         self.mesh = mesh
         self.plane = plane
         
-        self.points = o3d.geometry.PointCloud()
+        self.point_cloud = PointSet3D()
+        self.point_cloud_name = "points"
+
+        self.total_points = 10000
+        self.step = 1 / 100
         
     def animate_init(self) -> None:
-        self.vis.remove_geometry(self.points, reset_bounding_box=False)
-        self.points = self.plane.sample_points_uniformly(10000)
-        self.points.paint_uniform_color([0, 0, 0])
-        self.points_array = np.random.permutation(np.asarray(self.points.points))
-        self.index = 0
+        self.l = 0
         
-        self.points.points = o3d.utility.Vector3dVector(self.points_array[:self.index])
-        self.vis.add_geometry(self.points, reset_bounding_box=False)
+        self.point_cloud.clear()
+        self.point_cloud.createRandom(
+            Cuboid3D(self.plane.vertices[0], self.plane.vertices[-1]),
+            self.total_points,
+        )
+        self.points = self.point_cloud.points
+        self.points_colors = np.zeros((self.total_points, 3))
+        self.point_cloud.clear()
 
-        return
+        np.random.shuffle(self.points)
+
+        self.scene.removeShape(self.point_cloud_name)
+        self.scene.addShape(self.point_cloud, self.point_cloud_name)
+
     
-    def animate(self, vis):
-        if self.index > self.points_array.shape[0]:
+    def animate(self) -> bool:
+        if self.l > 1:
             self.stop_animate()
+
+        index = int(self.l * self.total_points)
             
-        self.points.points = o3d.utility.Vector3dVector(self.points_array[:self.index + 1])
-        self.index += 100
+        self.point_cloud.points = self.points[:index + 1]
+        self.point_cloud.colors = self.points_colors[:index + 1]
+        self.l += self.step
+        
+        self.scene.updateShape(self.point_cloud_name)
         
         return True

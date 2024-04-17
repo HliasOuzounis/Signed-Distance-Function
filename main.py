@@ -1,4 +1,5 @@
 import open3d as o3d
+import numpy as np
 
 from src.sequence_handler import SequenceHandler
 from src.mesh_constructor import MeshConstructor
@@ -16,6 +17,8 @@ print(f"Triangles: {len(mesh.triangles)}")
 WIDTH = 800
 HEIGHT = 800
 NAME = "Signed Distance Function"
+
+
 class Window(scene.Scene3D):
     def __init__(self, mesh) -> None:
         super().__init__(WIDTH, HEIGHT, NAME)
@@ -23,20 +26,25 @@ class Window(scene.Scene3D):
         self.sequenceHandler = SequenceHandler(self.window, self)
         self.window.set_on_key(self.sequenceHandler.perform_action)
         self.init_window()
-        
+
         self.mainLoop()
 
     def init_window(self):
+        # don't need axes or shadows
         self.scene_widget.scene.show_axes(False)
+        self.scene_widget.scene.set_lighting(
+            o3d.visualization.rendering.Open3DScene.LightingProfile.NO_SHADOWS,
+            np.array([0.577, -0.577, -0.577]),
+        )
         # Task 1: Create the mesh
         meshConstructor = MeshConstructor(self.mesh)
         self.sequenceHandler.next_animation = meshConstructor
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
-        # pointsConstructor = PointsConstructor(self.vis, meshConstructor.mesh, planeConstructor.plane)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane)
 
         meshConstructor.next_animation = planeConstructor
-        # planeConstructor.next_animation = pointsConstructor
+        planeConstructor.next_animation = pointsConstructor
 
 
 if __name__ == "__main__":
