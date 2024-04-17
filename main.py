@@ -31,16 +31,12 @@ class Window(scene.Scene3D):
         # Task 1: Create the mesh
         meshConstructor = MeshConstructor(self.mesh)
         self.sequenceHandler.next_animation = meshConstructor
-        return
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
-        planeConstructor = PlaneConstructor(self.vis, meshConstructor.mesh)
-        pointsConstructor = PointsConstructor(self.vis, meshConstructor.mesh, planeConstructor.plane)
+        planeConstructor = PlaneConstructor(meshConstructor.mesh)
+        # pointsConstructor = PointsConstructor(self.vis, meshConstructor.mesh, planeConstructor.plane)
 
         meshConstructor.next_animation = planeConstructor
-        planeConstructor.next_animation = pointsConstructor
-
-        # self.window.run()
-        # self.vis.destroy_window()
+        # planeConstructor.next_animation = pointsConstructor
 
 
 if __name__ == "__main__":

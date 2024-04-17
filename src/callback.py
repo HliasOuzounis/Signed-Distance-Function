@@ -36,13 +36,13 @@ class Callback(ABC):
         """
         return
 
-    def stop_animate(self, sequence: SequenceHandler, scene: Scene3D) -> None:
+    def stop_animate(self) -> None:
         """
         Function to stop the animation.
         """
 
-        scene.window.set_on_tick_event(None)
-        sequence.next_animation = self.next_animation
+        self.scene.window.set_on_tick_event(None)
+        self.sequence.next_animation = self.next_animation
 
     def skip(self, _sequence: SequenceHandler, _scene: Scene3D) -> None:
         """

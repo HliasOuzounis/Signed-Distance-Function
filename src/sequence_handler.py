@@ -16,11 +16,9 @@ class SequenceHandler:
             return
 
         if key == o3d.visualization.gui.KeyName.ENTER:
-            print("enter pressed (next animation)")
             self.next_animation(self, self.scene)
 
         if key == o3d.visualization.gui.KeyName.R:
-            print("r pressed (restart current animation)")
             self.curr_animation(self, self.scene)
 
         if key == o3d.visualization.gui.KeyName.U:

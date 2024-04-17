@@ -23,6 +23,7 @@ class MeshConstructor(Callback):
 
     def animate_init(self) -> None:
         self.l = 0
+        
         if self.shuffle:
             order = np.random.permutation(np.arange(len(self.mesh_triangles)))
             self.mesh_triangles = self.mesh_triangles[order]
@@ -36,13 +37,14 @@ class MeshConstructor(Callback):
                
 
     def animate(self) -> bool:
-        self.l += self.step
-        self.index = int(self.l * self.total)
-        self.mesh.triangles = self.mesh_triangles[:self.index + 1]
-        self.mesh.triangle_normals = self.mesh_normals[:self.index + 1]
+        if self.l > 1:
+            self.stop_animate()
 
-        if self.index > len(self.mesh_triangles):
-            self.stop_animate(self.sequence, self.scene)
+        index = int(self.l * self.total)
+        self.mesh.triangles = self.mesh_triangles[:index + 1]
+        self.mesh.triangle_normals = self.mesh_normals[:index + 1]
+
+        self.l += self.step
 
         self.scene.updateShape(self.mesh_id)
 
