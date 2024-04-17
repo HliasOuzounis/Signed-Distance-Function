@@ -5,7 +5,7 @@ from src.plane_constructor import PlaneConstructor
 from src.points_constructor import PointsConstructor
 from src.constants import *
 
-mesh = o3d.io.read_triangle_mesh("models/DuckMesh.ply")
+mesh = o3d.io.read_triangle_mesh("models/GnomeMesh.ply")
 print(f"Mesh: self-intersecting ({mesh.is_self_intersecting()}), edge-manifold ({mesh.is_edge_manifold()}), vertex-manifold ({mesh.is_vertex_manifold()}), watertight ({mesh.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}")
 
