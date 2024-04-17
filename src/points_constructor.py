@@ -31,8 +31,11 @@ class PointsConstructor(callback.Callback):
             self.total_points,
         )
         self.points = self.point_cloud.points
+        
+        # brute force works
         self.projected_points = self.mesh.vertices[:, :2]
         self.triangles = [Triangle2D(*self.projected_points[triangle]) for triangle in self.mesh.triangles]
+        
         self.points_colors = np.zeros((self.total_points, 3))
         self.point_cloud.clear()
 
@@ -63,8 +66,8 @@ class PointsConstructor(callback.Callback):
         return True
 
     def check_intersection(self, point: np.array) -> bool:
-        # return self.kd_tree.intersects_mesh(Point2D(point[:2]))
-        
+        return self.kd_tree.intersects_mesh(Point2D(point[:2]))
+
         # brute force works
         point = Point2D(point[:2])
         for triangle in self.triangles:
@@ -113,6 +116,9 @@ class KDTree:
     def build_tree(self, points, triangles, depth=0):
         if triangles.shape[0] == 0:
             return None
+        if points.shape[0] < 2:
+            print("No points left", triangles.shape[0])
+            return None
 
         if depth % 2 == 0:
             median = np.median(points[:, 0])
@@ -123,10 +129,11 @@ class KDTree:
             median = np.median(points[:, 1])
             is_above_line = points[:, 1] > median
             all_above_line = self.points[:, 1] > median
-            line = Line2D((0, median), (1, median))
+            line = Line2D((1, median), (0, median))
             
         P1 = points[is_above_line]
         P2 = points[~is_above_line]
+
 
         triangle_above_line = np.vectorize(lambda x: all_above_line[x])(triangles)
         
