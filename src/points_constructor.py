@@ -2,8 +2,10 @@ import numpy as np
 
 from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
 from vvrpywork.shapes import Triangle2D, Line2D, Point2D
+from vvrpywork.scene import Scene3D
 
 from . import utility, callback
+from .sequence_handler import SequenceHandler
 
 
 class PointsConstructor(callback.Callback):
@@ -31,11 +33,11 @@ class PointsConstructor(callback.Callback):
             self.total_points,
         )
         self.points = self.point_cloud.points
-        
+
         # brute force works
         self.projected_points = self.mesh.vertices[:, :2]
         self.triangles = [Triangle2D(*self.projected_points[triangle]) for triangle in self.mesh.triangles]
-        
+
         self.points_colors = np.zeros((self.total_points, 3))
         self.point_cloud.clear()
 
@@ -49,7 +51,7 @@ class PointsConstructor(callback.Callback):
 
         if self.l > 1:
             self.stop_animate()
-        
+
         index = int(self.l * self.total_points)
 
         self.point_cloud.points = self.points[: index + 1]
@@ -65,17 +67,23 @@ class PointsConstructor(callback.Callback):
 
         return True
 
+    def skip(self, _sequence: SequenceHandler, _scene: Scene3D) -> None:
+        """
+        Overload skip function because it's too many calculations at once.
+        Instead, just stop it
+        """
+        self.stop_animate()
+        return
+
     def check_intersection(self, point: np.array) -> bool:
         return self.kd_tree.intersects_mesh(Point2D(point[:2]))
 
-        # brute force works
+        # brute force works but kd tree is much faster
         point = Point2D(point[:2])
         for triangle in self.triangles:
             if triangle.contains(point):
                 return True
         return False
-            
-        
 
 
 class Node:

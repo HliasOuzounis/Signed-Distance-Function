@@ -9,7 +9,7 @@ from src.constants import *
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/CatMesh.ply")
+mesh = shapes.Mesh3D("models/GnomeMesh.ply")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}")
 
