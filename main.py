@@ -9,13 +9,13 @@ from src.constants import *
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/DuckMesh.ply")
+mesh = shapes.Mesh3D("models/CatMesh.ply")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}")
 
 
-WIDTH = 800
-HEIGHT = 800
+WIDTH = 1400
+HEIGHT = 900
 NAME = "Signed Distance Function"
 
 
@@ -23,6 +23,7 @@ class Window(scene.Scene3D):
     def __init__(self, mesh) -> None:
         super().__init__(WIDTH, HEIGHT, NAME)
         self.mesh = mesh
+        print(mesh.vertices.shape, mesh.triangles.shape)
         self.sequenceHandler = SequenceHandler(self.window, self)
         self.window.set_on_key(self.sequenceHandler.perform_action)
         self.init_window()

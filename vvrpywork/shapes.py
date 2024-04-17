@@ -340,7 +340,7 @@ class Line2D(Shape):
         '''
         return ((self.x2-self.x1)**2 + (self.y2-self.y1)**2)**.5
     
-    def isOnRight(self, point:Point2D) -> bool:
+    def isOnRight(self, point:Point2D) -> bool|np.bool_:
         '''Determines whether a point is to the right of the line.
         
         Determines whether a point is to the right of the line defined
@@ -1791,6 +1791,14 @@ class Line3D(Shape):
     def width(self) -> Number:
         '''The line segment's width.'''
         return self._width
+    @width.setter
+    def width(self, width:Number):
+        try:
+            width = width.item()
+        except:
+            pass
+        finally:
+            self._width = width
     
     @property
     def resolution(self) -> int:

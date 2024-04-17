@@ -51,3 +51,23 @@ def assign_colors(data):
     colors[:, 2] = np.absolute(vertices[:, 2])
 
     return colors
+
+
+def points_positions_relative_to_line(vertices, line_params):
+    """
+    Determine the positions of points relative to a line defined by its parameters.
+
+    Parameters:
+    - vertices: np.ndarray with vertex positions
+    - line_params: Parameters of the line [a, b, d]
+
+    Returns:
+    - is_above_line: Boolean array indicating whether each point is above the line
+    """
+
+    line_params = line_params.reshape(-1, 1)
+
+    vertices = np.hstack([vertices, np.ones((vertices.shape[0], 1))])
+    is_above_line = np.dot(vertices, line_params) > 0
+    
+    return is_above_line
