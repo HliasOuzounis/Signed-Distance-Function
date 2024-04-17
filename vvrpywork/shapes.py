@@ -2900,7 +2900,7 @@ class Mesh3D(ShapeSet):
         if self.use_material:
             scene.scene_widget.scene.add_geometry(name, self._shape, self._material)
         else:
-            scene.scene_widget.scene.add_geometry(name, self._shape)
+            scene.scene_widget.scene.add_geometry(name, self._shape, o3d.visualization.rendering.MaterialRecord())
 
     def _update(self, name:str, scene:Scene3D):
         scene.removeShape(name)
