@@ -31,6 +31,8 @@ class PointsConstructor(callback.Callback):
             self.total_points,
         )
         self.points = self.point_cloud.points
+        self.projected_points = self.mesh.vertices[:, :2]
+        self.triangles = [Triangle2D(*self.projected_points[triangle]) for triangle in self.mesh.triangles]
         self.points_colors = np.zeros((self.total_points, 3))
         self.point_cloud.clear()
 
@@ -61,7 +63,16 @@ class PointsConstructor(callback.Callback):
         return True
 
     def check_intersection(self, point: np.array) -> bool:
-        return self.kd_tree.intersects_mesh(Point2D(point[:2]))
+        # return self.kd_tree.intersects_mesh(Point2D(point[:2]))
+        
+        # brute force works
+        point = Point2D(point[:2])
+        for triangle in self.triangles:
+            if triangle.contains(point):
+                return True
+        return False
+            
+        
 
 
 class Node:
