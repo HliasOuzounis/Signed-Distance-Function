@@ -1,46 +1,34 @@
 from abc import ABC, abstractmethod
 
-from open3d.visualization import Visualizer, VisualizerWithKeyCallback
+from open3d.visualization.gui import Window # type: ignore
 
 from .constants import *
+from ..main import SequenceHandler
 
 
 class Callback(ABC):
-    def __init__(self, vis: Visualizer|VisualizerWithKeyCallback) -> None:
-        self.vis = vis
+    def __init__(self) -> None:
         self._next_animation = empty_call
         self.l = 0
 
-    def __call__(self, vis: Visualizer|VisualizerWithKeyCallback, key: int|None = None, action: int|None = None) -> bool:
+    def __call__(self, sequence: SequenceHandler, window: Window) -> None:
         """
         The callback function that will be called when in the callback loop or when the key is pressed.
         Override if more complex functionality is needed.
         
         Params:
-            - vis: The visualizer object
+            - window: The window that the callback is attached to
             - key: State of the key if it was pressed
             - action: Additional mods (ctrl, shift, etc.) if the key was pressed
-
-        Return: 
-            True if UpadteGeometry() needs to be run else False
         """
-        # We only want to run the init function once, if the key is pressed don't run it again
-        if key is not None and key != 1:
-            return False
 
         self.animate_init()
-        self.vis.register_animation_callback(self.animate)
-        self.vis.register_key_action_callback(redo_key, self)
-        self.vis.register_key_action_callback(next_key, self.skip)
-
-        return True
-
-    def stop_animate(self):
-        """
-        Function to stop the animation.
-        """
-        self.vis.register_animation_callback(None)
-        self.vis.register_key_action_callback(next_key, self.next_animation)
+        window.set_on_tick(self.animate)
+        sequence.next_animation = self.skip
+        sequence.curr_animation = self.animate
+        
+        self.window = window
+        self.sequence = sequence
 
     def animate_init(self) -> None:
         """
@@ -48,18 +36,23 @@ class Callback(ABC):
         """
         return
 
-    def skip(self, _vis, key, _action) -> None:
+    def stop_animate(self, sequence: SequenceHandler, window: Window) -> None:
+        """
+        Function to stop the animation.
+        """
+
+        window.set_on_tick(None)
+        sequence.next_animation = self.next_animation
+
+    def skip(self, _sequence: SequenceHandler, _window: Window) -> None:
         """
         Skip the current animation
         """
-        if key != 1:
-            return 
-
         self.l = 1
         return
 
     @abstractmethod
-    def animate(self, vis):
+    def animate(self):
         """
         The animation function that will be put in the callback loop after the key is pressed.
         Needs to have an end condition and call self.stop_animate to stop the animation.
@@ -80,5 +73,5 @@ class Callback(ABC):
         self._next_animation = next
 
 
-def empty_call(vis, *args):
+def empty_call(window, *args):
     return False
