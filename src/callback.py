@@ -9,7 +9,7 @@ class Callback(ABC):
     def __init__(self, vis: Visualizer|VisualizerWithKeyCallback) -> None:
         self.vis = vis
         self._next_animation = empty_call
-
+        self.l = 0
 
     def __call__(self, vis: Visualizer|VisualizerWithKeyCallback, key: int|None = None, action: int|None = None) -> bool:
         """
@@ -30,22 +30,33 @@ class Callback(ABC):
 
         self.animate_init()
         self.vis.register_animation_callback(self.animate)
-        
+        self.vis.register_key_action_callback(redo_key, self)
+        self.vis.register_key_action_callback(next_key, self.skip)
+
         return True
-    
+
     def stop_animate(self):
         """
         Function to stop the animation.
         """
         self.vis.register_animation_callback(None)
-        self.vis.register_key_action_callback(next_key, self.next_animation)\
-    
+        self.vis.register_key_action_callback(next_key, self.next_animation)
+
     def animate_init(self) -> None:
         """
         Initialize the animation. Will be called when __call__ is called.
         """
         return
-        
+
+    def skip(self, _vis, key, _action) -> None:
+        """
+        Skip the current animation
+        """
+        if key != 1:
+            return 
+
+        self.l = 1
+        return
 
     @abstractmethod
     def animate(self, vis):
@@ -54,7 +65,7 @@ class Callback(ABC):
         Needs to have an end condition and call self.stop_animate to stop the animation.
         """
         raise NotImplementedError("Animation not implemented")
-    
+
     @property
     def next_animation(self):
         """
@@ -67,7 +78,6 @@ class Callback(ABC):
         if not isinstance(next, Callback):
             raise TypeError("next_animation must be a Callback object")
         self._next_animation = next
-        
 
 
 def empty_call(vis, *args):

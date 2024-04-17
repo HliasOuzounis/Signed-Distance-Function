@@ -12,7 +12,10 @@ class PointsConstructor(Callback):
         self.mesh = mesh
         self.plane = plane
         
+        self.points = o3d.geometry.PointCloud()
+        
     def animate_init(self) -> None:
+        self.vis.remove_geometry(self.points, reset_bounding_box=False)
         self.points = self.plane.sample_points_uniformly(10000)
         self.points.paint_uniform_color([0, 0, 0])
         self.points_array = np.random.permutation(np.asarray(self.points.points))
@@ -21,7 +24,7 @@ class PointsConstructor(Callback):
         self.points.points = o3d.utility.Vector3dVector(self.points_array[:self.index])
         self.vis.add_geometry(self.points, reset_bounding_box=False)
 
-        return super().animate_init()
+        return
     
     def animate(self, vis):
         if self.index > self.points_array.shape[0]:
