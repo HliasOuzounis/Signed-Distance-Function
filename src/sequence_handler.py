@@ -8,7 +8,6 @@ class SequenceHandler:
         self._next_animation = empty_call
         self._curr_animation = empty_call
         self._prev_animation = empty_call
-        self._skip_animation = empty_call
 
     def perform_action(self, key_event):
         key, action = key_event.key, key_event.type
@@ -23,10 +22,6 @@ class SequenceHandler:
 
         if key == o3d.visualization.gui.KeyName.U:
             print("Not implemented yet")
-
-        # if key == o3d.visualization.gui.KeyName.S:
-        #     print("s pressed (skip current animation)")
-        #     self.skip_animation(self, self.scene)
 
     @property
     def next_animation(self):
@@ -51,14 +46,6 @@ class SequenceHandler:
     @prev_animation.setter
     def prev_animation(self, prev):
         self._prev_animation = prev
-
-    @property
-    def skip_animation(self):
-        return self._skip_animation
-
-    @skip_animation.setter
-    def skip_animation(self, skip):
-        self._skip_animation = skip
 
 
 def empty_call(window, *args):

@@ -12,7 +12,7 @@ class MeshConstructor(Callback):
         self.mesh_id = "mesh"
         self.mesh = utility.fit_to_unit_sphere(mesh)
         self.mesh.color = [0, 0, 0, 1]
-        self.mesh.vertex_colors = utility.assign_colors(self.mesh)
+        # self.mesh.vertex_colors = utility.assign_colors(self.mesh)
 
         self.shuffle = True # shuffle the triangles
 
