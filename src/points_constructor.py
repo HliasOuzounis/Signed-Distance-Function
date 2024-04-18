@@ -15,6 +15,8 @@ class PointsConstructor(callback.Callback):
         self.mesh = mesh
         self.plane = plane
 
+        self.triangle_params = TriangleParams(self.mesh.triangles, self.mesh.vertices)
+
         self.kd_tree = KDTree(self.mesh.vertices, self.mesh.triangles)
 
         self.point_cloud = PointSet3D()
@@ -40,17 +42,10 @@ class PointsConstructor(callback.Callback):
         )
         self.points = self.point_cloud.points
 
-        # brute force works
-        self.projected_points = self.mesh.vertices[:, :2]
-        self.triangles = [Triangle2D(*self.projected_points[triangle]) for triangle in self.mesh.triangles]
-        self.triangle_coords = self.projected_points[self.mesh.triangles]
-
         self.points_colors = np.zeros((self.total_points, 3))
         self.point_cloud.clear()
 
-        np.random.shuffle(self.points)
-
-        print(self.check_points(self.points[:20]))
+        # np.random.shuffle(self.points)
 
         self.scene.removeShape(self.point_cloud_name)
         self.scene.addShape(self.point_cloud, self.point_cloud_name)
@@ -58,7 +53,8 @@ class PointsConstructor(callback.Callback):
     def animate(self) -> bool:
         self.l += self.step
 
-        if self.l > 1:
+        if self.l > 1 + self.slack:
+            print(self.l)
             self.estimate_area()
             self.stop_animate()
 
@@ -66,15 +62,14 @@ class PointsConstructor(callback.Callback):
 
         self.point_cloud.points = self.points[: index + 1]
         self.point_cloud.colors = self.points_colors[: index + 1]
+        
+        # interecting_points = self.triangle_params.check_points(self.points[self.prev_index : index])
+        interecting_points = self.kd_tree.intersects_mesh(self.points[self.prev_index : index + 1])
 
-        a = self.check_points(self.points[self.prev_index:index])
-        for i, j in enumerate(a):
-            if j:
+        for i, intersects in enumerate(interecting_points):
+            if intersects:
                 self.points_colors[self.prev_index + i] = [1, 0, 0]
-        # for i, point in enumerate(self.points[self.prev_index:index]):
-        #     if self.intersects_mesh(point):
-        #         self.points_colors[self.prev_index + i] = [1, 0, 0]
-        #         self.intersecting_points.add(Point3D(point))
+                self.intersecting_points.add(Point3D(self.points[self.prev_index + i]))
 
         self.prev_index = index
         self.scene.updateShape(self.point_cloud_name)
@@ -90,79 +85,82 @@ class PointsConstructor(callback.Callback):
         self.stop_animate()
         return
 
-    def check_points(self, points) -> np.bool_:
-        v0, v1, v2 = (
-            self.triangle_coords[:, 0, :],
-            self.triangle_coords[:, 1, :],
-            self.triangle_coords[:, 2, :]
-        )
-        edge1 = v1 - v0
-        edge2 = v2 - v0
-
-        vp = points[:, np.newaxis, :2] - v0
-
-        # vp is of shape (n_points, m_tringles, 2)
-        # edge is of shape (m_triangle, 2) -> reshape (2, m_triangle)
-        # want to get bool array of shape (n_points, m_triangles) -> .any() (n_points,)
-
-        dot00 = np.einsum("ij,ij->i", edge1, edge1)
-        dot01 = np.einsum("ij,ij->i", edge1, edge2)
-        dot11 = np.einsum("ij,ij->i", edge2, edge2)
-        dot20 = np.einsum("ijk,jk->ij", vp, edge1)
-        dot21 = np.einsum("ijk,jk->ij", vp, edge2)
-
-        denom = dot00 * dot11 - dot01 * dot01
-        u = (dot11 * dot20 - dot01 * dot21) / denom
-        v = (dot00 * dot21 - dot01 * dot20) / denom
-
-        inside = (u >= 0) & (v >= 0) & (u + v <= 1)
-        return inside.any(axis=1)       
-
     def intersects_mesh(self, point: np.array) -> bool:
         return self.kd_tree.intersects_mesh(Point2D(point[:2]))
-
-        # brute force works but kd tree is much faster
-        point = Point2D(point[:2])
-        for triangle in self.triangles:
-            if triangle.contains(point):
-                return True
-        return False
 
     def estimate_area(self) -> None:
         plane1 = self.plane.vertices[0]
         plane2 = self.plane.vertices[-1]
         plane_area = np.linalg.norm(plane1 - plane2) * np.linalg.norm(plane1 - plane2)
-        print(f"Area of projection: {self.intersecting_points.points.shape[0] / self.prev_index * plane_area:.4f} units^2")
-        print(f"{self.intersecting_points.points.shape[0]} points out of {self.prev_index} points")
+        print(
+            f"Area of projection: {self.intersecting_points.points.shape[0] / self.prev_index * plane_area:.4f} units^2"
+        )
+        print(
+            f"{self.intersecting_points.points.shape[0]} points out of {self.prev_index} points"
+        )
+
+
+class TriangleParams:
+    def __init__(self, triangles, points) -> None:
+        # project onto plane
+        points = points[:, :2]
+        triangles = points[triangles]
+        
+        self.v0, v1, v2 = triangles[:, 0, :], triangles[:, 1, :], triangles[:, 2, :]
+        self.edge1 = v1 - self.v0
+        self.edge2 = v2 - self.v0
+
+        self.dot00 = np.einsum("ij,ij->i", self.edge1, self.edge1)
+        self.dot01 = np.einsum("ij,ij->i", self.edge1, self.edge2)
+        self.dot11 = np.einsum("ij,ij->i", self.edge2, self.edge2)
+
+        self.inv_denom = 1 / (self.dot00 * self.dot11 - self.dot01 * self.dot01)
+
+    def check_points(self, points):
+        vp = points[:, np.newaxis, :2] - self.v0
+
+        dot20 = np.einsum("ijk,jk->ij", vp, self.edge1)
+        dot21 = np.einsum("ijk,jk->ij", vp, self.edge2)
+
+        u = (self.dot11 * dot20 - self.dot01 * dot21) * self.inv_denom
+        v = (self.dot00 * dot21 - self.dot01 * dot20) * self.inv_denom
+
+        inside = (u >= 0) & (v >= 0) & (u + v <= 1)
+        return inside.any(axis=1)
 
 
 class Node:
-    def __init__(self, points, line: Line2D, intersecting_triangles: np.array) -> None:
+    def __init__(self, points, line: np.array, median: float, intersecting_triangles: np.array) -> None:
         self.points = points
         self.line = line
-        self.intersecting_triangles = [
-            Triangle2D(*points[triangle]) for triangle in intersecting_triangles
-        ]
+        self.median = median
+        self.intersecting_triangles = TriangleParams(intersecting_triangles, points)
 
         self.left = None
         self.right = None
 
-    def check_intersection(self, point: Point2D) -> bool:
-        for trinagle in self.intersecting_triangles:
-            if trinagle.contains(point):
-                return True
+    def check_intersection(self, points: np.array):
+        if points.shape[0] == 0:
+            return np.zeros(0, dtype=bool)
         
-        if self.is_on_right(point):
-            if self.right is not None:
-                return self.right.check_intersection(point)
-        else:
-            if self.left is not None:
-                return self.left.check_intersection(point)
+        intersects = self.intersecting_triangles.check_points(points)
 
-        return False
+        on_right = self.is_on_right(points)
 
-    def is_on_right(self, point: Point2D) -> bool:
-        return self.line.isOnRight(point)
+        interescts_right = np.zeros_like(intersects, dtype=bool)
+        if self.right is not None:
+            interescts_right[on_right & ~intersects] = self.right.check_intersection(points[on_right & ~intersects])
+
+        interescts_left = np.zeros_like(intersects, dtype=bool)
+        if self.left is not None:
+            interescts_left[~on_right & ~intersects] = self.left.check_intersection(points[~on_right & ~intersects])
+
+        return intersects | interescts_right | interescts_left
+    
+    
+    def is_on_right(self, points: np.array):
+        points = points[:, :2]
+        return np.dot(points, self.line) > self.median
 
 
 class KDTree:
@@ -172,35 +170,37 @@ class KDTree:
         self.root = self.build_tree(self.all_points, self.triangles)
 
     def build_tree(self, points, triangles, depth=0):
-        if triangles.shape[0] == 0 or points.shape[0] < 3:
+        if triangles.shape[0] == 0:
             return None
 
         if depth % 2 == 0:
             median = np.median(points[:, 0])
             is_above_line = points[:, 0] > median
             all_above_line = self.all_points[:, 0] > median
-            line = Line2D((median, 0), (median, 1))
+            line = np.array([1, 0]).T
         else:
             median = np.median(points[:, 1])
             is_above_line = points[:, 1] > median
             all_above_line = self.all_points[:, 1] > median
-            line = Line2D((1, median), (0, median))
-            
+            line = np.array([0, 1]).T
+
         P1 = points[is_above_line]
         P2 = points[~is_above_line]
 
         triangle_above_line = np.vectorize(lambda x: all_above_line[x])(triangles)
-        
-        P1_triangles = triangles[triangle_above_line.all(axis=1)]
-        P2_triangles = triangles[~triangle_above_line.any(axis=1)]
-        
-        intersecting_triangles = triangles[triangle_above_line.any(axis=1) & ~triangle_above_line.all(axis=1)]
+        all_below_line = ~triangle_above_line.any(axis=1)
+        all_above_line = triangle_above_line.all(axis=1)
 
-        v = Node(self.all_points, line, intersecting_triangles)
+        P1_triangles = triangles[all_above_line]
+        P2_triangles = triangles[all_below_line]
+
+        intersecting_triangles = triangles[~all_below_line & ~all_above_line]
+
+        v = Node(self.all_points, line, median, intersecting_triangles)
         v.right = self.build_tree(P1, P1_triangles, depth + 1)
         v.left = self.build_tree(P2, P2_triangles, depth + 1)
 
         return v
 
-    def intersects_mesh(self, point: Point2D) -> bool:
-        return self.root.check_intersection(point)
+    def intersects_mesh(self, points: np.array):
+        return self.root.check_intersection(points)
