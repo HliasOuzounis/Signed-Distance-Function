@@ -1,3 +1,7 @@
+Part 2.
+- Rotate plane before projection
+- Change Kd-Tree to handle projections
+
 Part 3.
 - Implement Delaunay triangulation for 2D points
 - Implement α-shapes to find the outline of the projection (check multiple α values)
