@@ -3,7 +3,7 @@ import numpy as np
 from vvrpywork.shapes import Mesh3D
 
 from .callback import Callback
-from . import utility
+from ..utils import utility
 
 
 class MeshConstructor(Callback):

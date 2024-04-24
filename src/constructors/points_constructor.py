@@ -4,7 +4,7 @@ from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D, Point3D
 from vvrpywork.shapes import Triangle2D, Line2D, Point2D
 
 from . import callback
-from .sequence_handler import SequenceHandler
+from ..sequence_handler import SequenceHandler
 
 class PointsConstructor(callback.Callback):
     def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:

@@ -2,10 +2,9 @@ import open3d as o3d
 import numpy as np
 
 from src.sequence_handler import SequenceHandler
-from src.mesh_constructor import MeshConstructor
-from src.plane_constructor import PlaneConstructor
-from src.points_constructor import PointsConstructor
-from src.constants import *
+from src.constructors.mesh_constructor import MeshConstructor
+from src.constructors.plane_constructor import PlaneConstructor
+from src.constructors.points_constructor import PointsConstructor
 
 from vvrpywork import scene, shapes
 

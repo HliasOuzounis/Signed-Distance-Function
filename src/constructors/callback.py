@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 
 from vvrpywork.scene import Scene3D
 
-from .constants import *
-from .sequence_handler import SequenceHandler, empty_call
+from ..sequence_handler import SequenceHandler, empty_call
 
 
 class Callback(ABC):
