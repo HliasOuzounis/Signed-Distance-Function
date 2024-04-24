@@ -1,0 +1,15 @@
+Part 3.
+- Implement Delaunay triangulation for 2D points
+- Implement α-shapes to find the outline of the projection (check multiple α values)
+
+Part 4.
+- ear clipping for polygon triangulation
+- Compute area of triangles
+- Compare with monte carlo
+
+
+Speed Improvements:
+- project all points of the mesh to the plane
+- use Delaunay and α-shape to find points on outline
+- use ear clipping to triangulate the outline
+- much fewer triangles left (from 11k)

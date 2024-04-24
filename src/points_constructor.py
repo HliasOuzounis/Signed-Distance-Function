@@ -2,41 +2,39 @@ import numpy as np
 
 from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D, Point3D
 from vvrpywork.shapes import Triangle2D, Line2D, Point2D
-from vvrpywork.scene import Scene3D
 
 from . import callback
 from .sequence_handler import SequenceHandler
-
 
 class PointsConstructor(callback.Callback):
     def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
         super().__init__()
 
         self.mesh = mesh
-        self.plane = plane
-
-        self.triangle_params = TriangleParams(self.mesh.triangles, self.mesh.vertices)
-
-        self.kd_tree = KDTree(self.mesh.vertices, self.mesh.triangles)
+        self.plane = plane        
 
         self.point_cloud = PointSet3D()
         self.point_cloud_name = "points"
 
-        self.intersecting_points = PointSet3D()
-
         self.total_points = 10000
-        self.step = 1 / 100
+        self.step = 1 / 200
 
     def animate_init(self) -> None:
         self.l = 0
         self.prev_index = 0
 
-        self.intersecting_points.clear()
+        # self.triangle_params = TriangleParams(self.mesh.triangles, self.mesh.vertices)
+
+        self.kd_tree = KDTree(self.mesh.vertices, self.mesh.triangles)
+
+        self.intersecting_points = np.empty((0, 3))
+        self.projection_pointcloud = PointSet3D()
+
         self.point_cloud.clear()
         self.point_cloud.createRandom(
             Cuboid3D(
-                self.plane.vertices[0] + np.array([0, 0, 0.001]),
-                self.plane.vertices[-1] + np.array([0, 0, 0.001]),
+                self.plane.vertices[0] + np.array([0, 0, 0.0001]),
+                self.plane.vertices[-1] + np.array([0, 0, 0.0001]),
             ),
             self.total_points,
         )
@@ -53,37 +51,30 @@ class PointsConstructor(callback.Callback):
     def animate(self) -> bool:
         self.l += self.step
 
-        if self.l > 1 + self.slack:
-            print(self.l)
+        if self.l > self.limit:
+            self.projection_pointcloud = PointSet3D(self.intersecting_points)
             self.estimate_area()
             self.stop_animate()
 
         index = int(self.l * self.total_points)
 
+        # interecting_points = self.triangle_params.check_points(self.points[self.prev_index : index])
+        interecting_points = self.kd_tree.intersects_mesh(self.points[self.prev_index : index + 1]) # ~ 4 times faster
+
+        self.points_colors[self.prev_index: index + 1][interecting_points] = [1, 0, 0]
+        self.intersecting_points = np.concatenate([
+                self.intersecting_points,
+                self.points[self.prev_index : index + 1][interecting_points],
+            ], axis=0,
+        )
+
         self.point_cloud.points = self.points[: index + 1]
         self.point_cloud.colors = self.points_colors[: index + 1]
-        
-        # interecting_points = self.triangle_params.check_points(self.points[self.prev_index : index])
-        interecting_points = self.kd_tree.intersects_mesh(self.points[self.prev_index : index + 1])
-
-        for i, intersects in enumerate(interecting_points):
-            if intersects:
-                self.points_colors[self.prev_index + i] = [1, 0, 0]
-                self.intersecting_points.add(Point3D(self.points[self.prev_index + i]))
 
         self.prev_index = index
         self.scene.updateShape(self.point_cloud_name)
 
         return True
-
-    def skip(self, _sequence: SequenceHandler, _scene: Scene3D) -> None:
-        """
-        Overload skip function because it's too many calculations at once.
-        Instead, just stop it
-        """
-        self.estimate_area()
-        self.stop_animate()
-        return
 
     def intersects_mesh(self, point: np.array) -> bool:
         return self.kd_tree.intersects_mesh(Point2D(point[:2]))
@@ -91,12 +82,12 @@ class PointsConstructor(callback.Callback):
     def estimate_area(self) -> None:
         plane1 = self.plane.vertices[0]
         plane2 = self.plane.vertices[-1]
-        plane_area = np.linalg.norm(plane1 - plane2) * np.linalg.norm(plane1 - plane2)
+        plane_area = np.linalg.norm(plane1[0] - plane2[0]) * np.linalg.norm(plane1[1] - plane2[1])
         print(
-            f"Area of projection: {self.intersecting_points.points.shape[0] / self.prev_index * plane_area:.4f} units^2"
+            f"Area of projection: {self.intersecting_points.shape[0] / self.prev_index * plane_area:.4f} units^2"
         )
         print(
-            f"{self.intersecting_points.points.shape[0]} points out of {self.prev_index} points"
+            f"{self.intersecting_points.shape[0]} points out of {self.prev_index} points"
         )
 
 

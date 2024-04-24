@@ -37,7 +37,7 @@ class MeshConstructor(Callback):
                
 
     def animate(self) -> bool:
-        if self.l > 1:
+        if self.l > self.limit:
             self.stop_animate()
 
         index = int(self.l * self.total)

@@ -10,7 +10,7 @@ class Callback(ABC):
     def __init__(self) -> None:
         self._next_animation = empty_call
         self.l = 0
-        self.slack = 0.01
+        self.limit = 1 + 0.00001 # to avoid floating point errors
 
     def __call__(self, sequence: SequenceHandler, scene: Scene3D) -> None:
         """

@@ -69,5 +69,5 @@ def points_positions_relative_to_line(vertices, line_params):
 
     vertices = np.hstack([vertices, np.ones((vertices.shape[0], 1))])
     is_above_line = np.dot(vertices, line_params) > 0
-    
+
     return is_above_line
