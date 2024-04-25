@@ -15,6 +15,7 @@ class PointsConstructor(Callback):
         self.plane = plane
 
         self.point_cloud = PointSet3D()
+        self.projection_pointcloud = PointSet3D()
         self.point_cloud_name = "points"
 
         self.total_points = 10000
@@ -24,15 +25,15 @@ class PointsConstructor(Callback):
         self.l = 0
         self.prev_index = 0
 
-        self.plane_normal = np.cross(
+        plane_normal = np.cross(
             self.plane.vertices[1] - self.plane.vertices[0],
             self.plane.vertices[2] - self.plane.vertices[0],
         )
-        self.plane_normal /= np.linalg.norm(self.plane_normal)
+        plane_normal /= np.linalg.norm(plane_normal)
 
         self.rot_mat = (
-            utility.rotation_matrix_from_vectors(self.plane_normal, np.array([0, 0, 1]))
-            if self.plane_normal[2] != 1
+            utility.rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
+            if plane_normal[2] != 1
             else np.eye(3)
         )
         self.inv_rot_mat = np.linalg.inv(self.rot_mat)
@@ -44,7 +45,7 @@ class PointsConstructor(Callback):
         self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
 
         self.intersecting_points = np.empty((0, 3))
-        self.projection_pointcloud = PointSet3D()
+        self.projection_pointcloud.clear()
 
         self.point_cloud.clear()
         self.point_cloud.createRandom(
@@ -66,16 +67,17 @@ class PointsConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
-            self.projection_pointcloud = PointSet3D(self.intersecting_points)
+            self.projection_pointcloud.points = self.intersecting_points
+
+            self.scene.removeShape(self.point_cloud_name)
+
             self.estimate_area()
             self.stop_animate()
 
         index = int(self.l * self.total_points)
 
         # interecting_points = self.triangle_params.check_points(self.points[self.prev_index : index])
-        interecting_points = self.kd_tree.intersects_mesh(
-            self.points[self.prev_index : index + 1]
-        )  # ~ 4 times faster
+        interecting_points = self.kd_tree.intersects_mesh(self.points[self.prev_index : index + 1])  # ~ 4 times faster
 
         self.points_colors[self.prev_index : index + 1][interecting_points] = [1, 0, 0]
         self.intersecting_points = np.concatenate(
@@ -97,12 +99,7 @@ class PointsConstructor(Callback):
     def estimate_area(self) -> None:
         plane1 = self.plane.vertices[0]
         plane2 = self.plane.vertices[-1]
-        plane_area = np.linalg.norm(plane1[0] - plane2[0]) * np.linalg.norm(
-            plane1[1] - plane2[1]
-        )
-        print(
-            f"Area of projection: {self.intersecting_points.shape[0] / self.prev_index * plane_area:.4f} units^2"
-        )
-        print(
-            f"{self.intersecting_points.shape[0]} points out of {self.prev_index} points"
-        )
+        plane_area = np.linalg.norm(plane1[0] - plane2[0]) * np.linalg.norm(plane1[1] - plane2[1])
+        
+        print(f"Area of projection: {self.intersecting_points.shape[0] / self.prev_index * plane_area:.4f} units^2")
+        print(f"{self.intersecting_points.shape[0]} points out of {self.prev_index} points")

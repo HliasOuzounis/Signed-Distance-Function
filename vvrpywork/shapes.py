@@ -608,7 +608,7 @@ class Triangle2D(Shape):
 
         return Circle2D((ux, uy), r)
     
-    def contains(self, point:Point2D) -> bool:
+    def contains(self, point:Point2D) -> bool|np.bool_:
         '''Determines whether a point is inside the triangle.
 
         Args:
@@ -627,6 +627,9 @@ class Triangle2D(Shape):
         y2 = self.y2
         x3 = self.x3
         y3 = self.y3
+        
+        if (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3) == 0:
+            return False
 
         a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3))
         b = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / ((y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3))

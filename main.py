@@ -2,9 +2,12 @@ import open3d as o3d
 import numpy as np
 
 from src.sequence_handler import SequenceHandler
-from src.constructors.mesh_constructor import MeshConstructor
-from src.constructors.plane_constructor import PlaneConstructor
-from src.constructors.points_constructor import PointsConstructor
+from src.constructors import (
+    MeshConstructor,
+    PlaneConstructor,
+    PointsConstructor,
+    OutlineConstructor,
+)
 
 from vvrpywork import scene, shapes
 
@@ -45,6 +48,10 @@ class Window(scene.Scene3D):
 
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = pointsConstructor
+        
+        # Task 3: Calculate outline of the projected points
+        outlineConstructor = OutlineConstructor(pointsConstructor.projection_pointcloud)
+        pointsConstructor.next_animation = outlineConstructor
 
 
 if __name__ == "__main__":
