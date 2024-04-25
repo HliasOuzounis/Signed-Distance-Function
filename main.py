@@ -8,7 +8,7 @@ from src.constructors.points_constructor import PointsConstructor
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/DuckMesh.ply")
+mesh = shapes.Mesh3D("models/CatMesh.ply")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}")
 
@@ -24,6 +24,7 @@ class Window(scene.Scene3D):
         self.mesh = mesh
         self.sequenceHandler = SequenceHandler(self.window, self)
         self.window.set_on_key(self.sequenceHandler.perform_action)
+        self.scene_widget.look_at(np.zeros(3), np.array([-1, 0.5, 1]), np.array([0, 1, 0]))
         self.init_window()
 
         self.mainLoop()

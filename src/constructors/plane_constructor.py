@@ -16,20 +16,19 @@ class PlaneConstructor(Callback):
         minx = np.min(self.mesh_vertices[:, 0]) - offset
         maxy = np.max(self.mesh_vertices[:, 1]) + offset
         miny = np.min(self.mesh_vertices[:, 1]) - offset
-        z = np.max(self.mesh_vertices[:, 2]) + offset
-        # z = np.max(np.linalg.norm(self.mesh_vertices, axis=1)) + offset
+        # z = np.max(self.mesh_vertices[:, 2]) + offset
+        z = np.max(np.linalg.norm(self.mesh_vertices, axis=1)) + offset
 
-        self.start1 = np.array([minx, miny, z])
-        self.start2 = np.array([maxx, miny, z])
+        self.start1 = np.array([minx, miny, -z])
+        self.start2 = np.array([maxx, miny, -z])
 
-        self.end1 = np.array([minx, maxy, z])
-        self.end2 = np.array([maxx, maxy, z])
+        self.end1 = np.array([minx, maxy, -z])
+        self.end2 = np.array([maxx, maxy, -z])
 
         self.step = 1 / 100
 
         self.plane = Mesh3D()
         self.plane_name = "plane"
-        self.normal = np.array([0, 0, -1])
 
     def animate_init(self) -> None:
         self.l = 0
@@ -39,7 +38,6 @@ class PlaneConstructor(Callback):
         self.plane.triangles = np.array([[0, 1, 2], [3, 2, 1]])
         self.plane.color = [0.5, 0.5, 0.5]
 
-        self.normal = np.array([0, 0, -1])
 
         self.scene.removeShape(self.plane_name)
         self.scene.addShape(self.plane, self.plane_name)
@@ -59,6 +57,11 @@ class PlaneConstructor(Callback):
 
         return True
     
+    def stop_animate(self) -> None:
+        self.scene.window.set_on_key(self.handleRotation)
+        self.scene.window.set_on_tick_event(None)
+        # return super().stop_animate()
+    
 
     def handleRotation(self, key_event) -> None:
         rotate_step = np.pi / 30
@@ -68,10 +71,10 @@ class PlaneConstructor(Callback):
             super().stop_animate()
             self.scene.window.set_on_key(self.sequence.perform_action)
 
-        if key == o3d.visualization.gui.KeyName.W:
-            self.rotate(np.array([rotate_step, 0, 0]))
-        if key == o3d.visualization.gui.KeyName.S:
-            self.rotate(np.array([-rotate_step, 0, 0]))
+        # if key == o3d.visualization.gui.KeyName.W:
+        #     self.rotate(np.array([rotate_step, 0, 0]))
+        # if key == o3d.visualization.gui.KeyName.S:
+        #     self.rotate(np.array([-rotate_step, 0, 0]))
         if key == o3d.visualization.gui.KeyName.A:
             self.rotate(np.array([0, rotate_step, 0]))
         if key == o3d.visualization.gui.KeyName.D:
@@ -81,6 +84,5 @@ class PlaneConstructor(Callback):
         R = o3d.geometry.get_rotation_matrix_from_xyz(angle)
 
         self.plane.vertices = (self.plane.vertices @ R.T)
-        self.normal = self.normal @ R.T
 
         self.scene.updateShape(self.plane_name)
