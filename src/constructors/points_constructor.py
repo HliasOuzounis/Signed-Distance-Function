@@ -36,11 +36,11 @@ class PointsConstructor(Callback):
             else np.eye(3)
         )
         self.inv_rot_mat = np.linalg.inv(self.rot_mat)
-        plane_verts = np.dot(self.plane.vertices, self.rot_mat.T)
+        rotated_plane_verts = np.dot(self.plane.vertices, self.rot_mat.T)
 
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
-        # self.triangle_params = TriangleParams(self.mesh.triangles, self.mesh.vertices)
+        # self.triangle_params = TriangleParams(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.vertices)
         self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
 
         self.intersecting_points = np.empty((0, 3))
@@ -49,8 +49,8 @@ class PointsConstructor(Callback):
         self.point_cloud.clear()
         self.point_cloud.createRandom(
             Cuboid3D(
-                plane_verts[0] + np.array([0, 0, 0.0001]),
-                plane_verts[-1] + np.array([0, 0, 0.0001]),
+                rotated_plane_verts[0] + np.array([0, 0, 0.0001]),
+                rotated_plane_verts[-1] + np.array([0, 0, 0.0001]),
             ),
             self.total_points,
         )
