@@ -183,6 +183,9 @@ class Point2D(Shape):
             The distance between this point and `p`.
         '''
         return self.distanceSq(p) ** 0.5
+    
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y})"
 
 class Line2D(Shape):
     '''A class used to represent a line segment in 2D space.'''
@@ -354,7 +357,7 @@ class Line2D(Shape):
                 (incl. if it's on the line itself).
         '''
         return ((self.x2 - self.x1)*(point.y - self.y1) - (self.y2 - self.y1)*(point.x - self.x1)) < 0
-    
+
 class Triangle2D(Shape):
     '''A class used to represent a triangle in 2D space.'''
 
@@ -587,6 +590,14 @@ class Triangle2D(Shape):
         '''
         return Point2D((self.x3, self.y3))
     
+    def getPoints(self) -> tuple[Point2D, Point2D, Point2D]:
+        '''Returns the triangle's vertices.
+        
+        Returns:
+            The triangle's vertices as a tuple of `Point2D` objects.
+        '''
+        return (self.getPoint1(), self.getPoint2(), self.getPoint3())
+    
     def getCircumCircle(self) -> Circle2D:
         '''Returns the triangle's circumcircle.
         
@@ -636,7 +647,7 @@ class Triangle2D(Shape):
         c = 1 - a - b
 
         return (a >= 0 and b >= 0 and c >= 0 and a <= 1 and b <= 1 and c <= 1)
-    
+
 class Circle2D(Shape):
     '''A class used to represent a circle in 2D space.'''
 
@@ -780,7 +791,7 @@ class Circle2D(Shape):
         '''
         return Point2D((self.x, self.y))
     
-    def contains(self, point:Point2D) -> bool:
+    def contains(self, point:Point2D) -> bool|np.bool_:
         '''Determines whether a point is inside the circle.
 
         Args:
@@ -1933,7 +1944,7 @@ class Sphere3D(Shape):
             self._z = p[2].item()
         else:
             raise TypeError("Incorrect type for p")
-        
+
         self.radius = radius
         self._resolution = resolution
         self.width = width
@@ -1974,7 +1985,7 @@ class Sphere3D(Shape):
     def x(self) -> Number:
         '''The x-coordinate of the sphere's center point.'''
         return self._x
-    
+
     @x.setter
     def x(self, x:Number):
         try:
@@ -1988,7 +1999,7 @@ class Sphere3D(Shape):
     def y(self) -> Number:
         '''The y-coordinate of the sphere's center point.'''
         return self._y
-    
+
     @y.setter
     def y(self, y:Number):
         try:
@@ -2002,7 +2013,7 @@ class Sphere3D(Shape):
     def z(self) -> Number:
         '''The z-coordinate of the sphere's center point.'''
         return self._z
-    
+
     @z.setter
     def z(self, z:Number):
         try:
@@ -2016,7 +2027,7 @@ class Sphere3D(Shape):
     def radius(self) -> Number:
         '''The sphere's radius.'''
         return self._radius
-    
+
     @radius.setter
     def radius(self, r:Number):
         try:
@@ -2025,7 +2036,7 @@ class Sphere3D(Shape):
             pass
         finally:
             self._radius = r
-    
+
     @property
     def resolution(self) -> int:
         '''The sphere's resolution.
@@ -2034,12 +2045,12 @@ class Sphere3D(Shape):
         the amount of triangles that will be used.
         '''
         return self._resolution
-    
+
     @property
     def width(self) -> Number:
         '''The sphere's width (if not filled).'''
         return self._width
-    
+
     @width.setter
     def width(self, width:Number):
         try:
@@ -2053,7 +2064,7 @@ class Sphere3D(Shape):
     def color(self) -> ColorType:
         '''The sphere's color in RGBA format.'''
         return self._color
-    
+
     @color.setter
     def color(self, color:ColorType):
         self._color = [*color, 1] if len(color) == 3 else [*color]
@@ -2070,8 +2081,8 @@ class Sphere3D(Shape):
             The sphere's center point as a `Point3D` object.
         '''
         return Point3D((self.x, self.y, self.z))
-    
-    def contains(self, point:Point3D) -> bool:
+
+    def contains(self, point: Point3D) -> bool | np.bool_:
         '''Determines whether a point is inside the sphere.
 
         Args:
@@ -2082,6 +2093,7 @@ class Sphere3D(Shape):
                 outline), `False` otherwise.
         '''
         return (self.x - point.x) ** 2 + (self.y - point.y) ** 2 + (self.z - point.z) ** 2 <= self.radius ** 2
+
 
 class Cuboid3D(Shape):
     '''A class used to represent a cuboid in 3D space.

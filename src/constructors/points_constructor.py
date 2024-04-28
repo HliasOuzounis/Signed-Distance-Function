@@ -56,6 +56,10 @@ class PointsConstructor(Callback):
             ),
             self.total_points,
         )
+        
+        self.scene.addShape(self.non_intersecting, self.non_intersecting_name)
+        self.non_intersecting.remove_duplicated_points()
+        self.scene.removeShape(self.non_intersecting_name)
         self.random_points = self.non_intersecting.points
 
         self.non_intersecting.clear()
@@ -71,6 +75,8 @@ class PointsConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
+            # self.scene.removeShape(self.intersecting_name)
+            self.scene.removeShape(self.non_intersecting_name)
             self.estimate_area()
             self.stop_animate()
 

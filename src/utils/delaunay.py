@@ -3,7 +3,7 @@ import numpy as np
 from vvrpywork.shapes import Triangle2D, Point2D
 
     
-def get_delaunay(points: np.array) -> list[Triangle2D]:
+def get_triangulation(points: np.array) -> list[Triangle2D]:
     minx = np.min(points[:, 0])
     maxx = np.max(points[:, 0])
     miny = np.min(points[:, 1])

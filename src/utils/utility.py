@@ -53,13 +53,13 @@ def assign_colors(data):
     return colors
 
 
-def points_positions_relative_to_line(vertices, line_params):
+def points_positions_relative_to_line(vertices, line_params) -> np.array:
     """
     Determine the positions of points relative to a line defined by its parameters.
 
     Parameters:
     - vertices: np.ndarray with vertex positions
-    - line_params: Parameters of the line [a, b, d]
+    - line_params: Parameters of the line [a, b, c] in the equation ax + by + c = 0
 
     Returns:
     - is_above_line: Boolean array indicating whether each point is above the line
@@ -68,12 +68,12 @@ def points_positions_relative_to_line(vertices, line_params):
     line_params = line_params.reshape(-1, 1)
 
     vertices = np.hstack([vertices, np.ones((vertices.shape[0], 1))])
-    is_above_line = np.dot(vertices, line_params) > 0
+    is_above_line = np.dot(vertices, line_params) >= 0
 
     return is_above_line
 
 
-def rotation_matrix_from_vectors(vec1, vec2):
+def rotation_matrix_from_vectors(vec1: np.array, vec2: np.array) -> np.array:
     """
     Find the rotation matrix that aligns vec1 to vec2
     
