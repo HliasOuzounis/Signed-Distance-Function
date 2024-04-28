@@ -9,7 +9,8 @@
 
 ### Part 3
 
-- [ ] Implement Delaunay triangulation for 2D points
+- [X] Implement Delaunay triangulation for 2D points
+- [ ] split projection and point cloud points. Retain points only if inside projection
 - [ ] Implement α-shapes to find the outline of the projection (check multiple α values)
 - [ ] Create outline_constructor
 
@@ -31,3 +32,7 @@ Speed Improvements:
 - use Delaunay and α-shape to find points on outline
 - use ear clipping to triangulate the outline
 - much fewer triangles left (from 11k)
+
+## Part B
+
+...

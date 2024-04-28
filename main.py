@@ -50,7 +50,7 @@ class Window(scene.Scene3D):
         planeConstructor.next_animation = pointsConstructor
         
         # Task 3: Calculate outline of the projected points
-        outlineConstructor = OutlineConstructor(pointsConstructor.projection_pointcloud)
+        outlineConstructor = OutlineConstructor(pointsConstructor.intersecting)
         pointsConstructor.next_animation = outlineConstructor
 
 

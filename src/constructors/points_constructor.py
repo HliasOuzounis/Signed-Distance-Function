@@ -1,6 +1,6 @@
 import numpy as np
 
-from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D, Arrow3D
+from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
 
 from .callback import Callback
 from ..utils.kd_tree import KDTree, TriangleParams
@@ -14,9 +14,10 @@ class PointsConstructor(Callback):
         self.mesh = mesh
         self.plane = plane
 
-        self.point_cloud = PointSet3D()
-        self.projection_pointcloud = PointSet3D()
-        self.point_cloud_name = "points"
+        self.intersecting = PointSet3D()
+        self.intersecting_name = "intersecting points"
+        self.non_intersecting = PointSet3D()
+        self.non_intersecting_name = "non-intersecting points"
 
         self.total_points = 10000
         self.step = 1 / 200
@@ -44,55 +45,52 @@ class PointsConstructor(Callback):
         # self.triangle_params = TriangleParams(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.vertices)
         self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
 
-        self.intersecting_points = np.empty((0, 3))
-        self.projection_pointcloud.clear()
-
-        self.point_cloud.clear()
-        self.point_cloud.createRandom(
+        self.intersecting.clear()
+        self.points = np.empty((0, 3))
+        
+        self.non_intersecting.clear()
+        self.non_intersecting.createRandom(
             Cuboid3D(
-                rotated_plane_verts[0] + np.array([0, 0, 0.0001]),
+                rotated_plane_verts[0]  - np.array([0, 0, 0.0001]),
                 rotated_plane_verts[-1] + np.array([0, 0, 0.0001]),
             ),
             self.total_points,
         )
-        self.points = self.point_cloud.points
+        self.random_points = self.non_intersecting.points
 
         self.points_colors = np.zeros((self.total_points, 3))
-        self.point_cloud.clear()
+        self.non_intersecting.clear()
 
-        self.scene.removeShape(self.point_cloud_name)
-        self.scene.addShape(self.point_cloud, self.point_cloud_name)
+        self.scene.removeShape(self.intersecting_name)
+        self.scene.addShape(self.intersecting, self.intersecting_name)
+        self.scene.removeShape(self.non_intersecting_name)
+        self.scene.addShape(self.non_intersecting, self.non_intersecting_name)
 
     def animate(self) -> bool:
         self.l += self.step
 
         if self.l > self.limit:
-            self.projection_pointcloud.points = self.intersecting_points
-
-            self.scene.removeShape(self.point_cloud_name)
-
             self.estimate_area()
             self.stop_animate()
 
         index = int(self.l * self.total_points)
 
-        # interecting_points = self.triangle_params.check_points(self.points[self.prev_index : index])
-        interecting_points = self.kd_tree.intersects_mesh(self.points[self.prev_index : index + 1])  # ~ 4 times faster
+        # interecting_points_indexes = self.triangle_params.check_points(self.points[self.prev_index : index])
+        interecting_points_indexes = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1])  # ~ 4 times faster
 
-        self.points_colors[self.prev_index : index + 1][interecting_points] = [1, 0, 0]
-        self.intersecting_points = np.concatenate(
-            [
-                self.intersecting_points,
-                self.points[self.prev_index : index + 1][interecting_points],
-            ],
-            axis=0,
-        )
+        self.non_intersecting.points = np.dot(self.random_points[self.prev_index : index + 1][~interecting_points_indexes], self.rot_mat.T)
+        self.non_intersecting.colors = np.zeros((self.non_intersecting.points.shape[0], 3))
 
-        self.point_cloud.points = np.dot(self.points[: index + 1], self.rot_mat)
-        self.point_cloud.colors = self.points_colors[: index + 1]
+        self.points = np.concatenate([
+            self.points,
+            np.dot(self.random_points[self.prev_index : index + 1][interecting_points_indexes], self.rot_mat.T),
+        ], axis=0)
+        
+        self.intersecting.points = self.points            
+        self.intersecting.colors = np.zeros((self.intersecting.points.shape[0], 3)) + np.array([1, 0, 0])
 
-        self.prev_index = index
-        self.scene.updateShape(self.point_cloud_name)
+        self.scene.updateShape(self.intersecting_name)
+        self.scene.updateShape(self.non_intersecting_name)
 
         return True
 
@@ -100,6 +98,6 @@ class PointsConstructor(Callback):
         plane1 = self.plane.vertices[0]
         plane2 = self.plane.vertices[-1]
         plane_area = np.linalg.norm(plane1[0] - plane2[0]) * np.linalg.norm(plane1[1] - plane2[1])
-        
+
         print(f"Area of projection: {self.intersecting_points.shape[0] / self.prev_index * plane_area:.4f} units^2")
         print(f"{self.intersecting_points.shape[0]} points out of {self.prev_index} points")
