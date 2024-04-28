@@ -2489,20 +2489,20 @@ class PointSet3D(ShapeSet):
             size: The size of the displayed points.
             color: The color of the displayed points (RGB or RGBA).
         '''
-        self._points:list[List3] = []
+        self._points:NDArray = np.empty((0, 3))
         self.size = size
         self._opacity = color[3] if len(color) == 4 else 1
-        self._colors:list[ColorType] = []
+        self._colors:list[ColorType]|NDArray = []
 
         if points is not None:
             if isinstance(points, (np.ndarray, list, tuple)):
-                self._points = [list(_) for _ in points]
-                self._colors = [[*color, 1] if len(color) == 3 else [*color] for _ in points]
+                self._points = np.array(points)
+                self._colors = np.array([[*color, 1] if len(color) == 3 else [*color] for _ in points])
             else:
                 raise TypeError(f"Unsupported type for points: {type(points)}")
             
     def __len__(self):
-        return len(self._points)
+        return self.points.shape[0]
 
     def __getitem__(self, idx):
         return self.getPointAt(idx)
@@ -2537,12 +2537,18 @@ class PointSet3D(ShapeSet):
     @property
     def points(self) -> NDArray:
         '''The points of the pointset.'''
-        return np.array(self._points)
+        # return np.array(self._points)
+        return self._points
     
     @points.setter
     def points(self, points:NDArray):
-        if isinstance(points, (np.ndarray, list, tuple)):
-            self._points = [list(_) for _ in points]
+        if isinstance(points, (list, tuple)):
+            # self._points = [list(_) for _ in points]
+            self._points = np.array(points)
+        elif isinstance(points, np.ndarray):
+            self._points = points
+        else:
+            raise TypeError(f"Unsupported type for points: {type(points)}")
 
     @property
     def size(self) -> Number:
@@ -2565,8 +2571,13 @@ class PointSet3D(ShapeSet):
     
     @colors.setter
     def colors(self, colors:NDArray|List|Tuple):
-        if isinstance(colors, (np.ndarray, list, tuple)):
-            self._colors = [list(_) for _ in colors]
+        if isinstance(colors, (list, tuple)):
+            # self._colors = [list(_) for _ in colors]
+            self._colors = np.array(colors)
+        elif isinstance(colors, np.ndarray):
+            self._colors = colors
+        else:
+            raise TypeError(f"Unsupported type for colors: {type(colors)}")
 
     def getPointAt(self, index:int) -> Point3D:
         '''Returns the point at the specified index.
@@ -2587,8 +2598,8 @@ class PointSet3D(ShapeSet):
         Args:
             point: The `Point3D` object to append.
         '''
-        self._points.append([point.x, point.y, point.z])
-        self._colors.append(point.color)
+        self._points = np.append(self._points, [point.x, point.y, point.z], axis=0)
+        self._colors = np.append(self._colors, [[*point.color, 1] if len(point.color) == 3 else [*point.color]], axis=0)
 
     def createRandom(self, bound:Cuboid3D, num_points:int, seed:None|int|str=None, color:ColorType=(0, 0, 0)):
         '''Appends random points to the pointset.
@@ -2622,9 +2633,11 @@ class PointSet3D(ShapeSet):
 
             random_array = np.random.random_sample((num_points, 3))
             pts = random_array * np.array((x2-x1, y2-y1, z2-z1)) + np.array((x1, y1, z1))
-            for p in pts:
-                self._points.append(p)
-                self._colors.append([*color, 1] if len(color) == 3 else [*color])
+            self._points = pts
+            self._colors = np.array([[*color, 1] if len(color) == 3 else [*color] for _ in range(num_points)])
+            # for p in pts:
+            #     self._points.append(p)
+            #     self._colors.append([*color, 1] if len(color) == 3 else [*color])
 
         else:
             raise TypeError
@@ -2647,8 +2660,10 @@ class PointSet3D(ShapeSet):
         Clears the pointset, completely removing all points and
         information about them (e.g., color).
         '''
-        self._points.clear()
-        self._colors.clear()
+        # self._points.clear()
+        # self._colors.clear()
+        self._points = np.empty((0, 3))
+        self._colors = np.empty((0, 4))
         
     def getAABB(self) -> Cuboid3D:
         '''Returns the AABB of the pointset.

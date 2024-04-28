@@ -42,7 +42,7 @@ class PointsConstructor(Callback):
 
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
-        self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, self.inv_rot_mat))
+        # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, self.inv_rot_mat))
         self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
 
         self.intersecting.clear()
