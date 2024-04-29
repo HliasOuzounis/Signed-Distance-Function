@@ -76,7 +76,7 @@ class PointsConstructor(Callback):
 
         if self.l > self.limit:
             # self.scene.removeShape(self.intersecting_name)
-            self.scene.removeShape(self.non_intersecting_name)
+            # self.scene.removeShape(self.non_intersecting_name)
             self.estimate_area()
             self.stop_animate()
 
@@ -86,7 +86,7 @@ class PointsConstructor(Callback):
         interecting_points_indexes = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1])  # ~ 2 times faster
 
         self.non_intersecting_points = np.concatenate([
-            self.non_intersecting_points,
+            self.non_intersecting_points[(self.prev_index - index) * 4:],
             np.dot(self.random_points[self.prev_index : index + 1][~interecting_points_indexes], self.rot_mat),
         ], axis=0)
         

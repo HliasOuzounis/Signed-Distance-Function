@@ -2,7 +2,7 @@ import numpy as np
 
 from .callback import Callback
 
-from vvrpywork.shapes import PointSet3D, LineSet3D, Line3D
+from vvrpywork.shapes import PointSet3D, Line3D
 
 from ..utils.alpha_shapes import get_outline
 from ..utils import utility
@@ -32,10 +32,11 @@ class OutlineConstructor(Callback):
         self.projected_points = np.dot(self.points, inv_rot_mat)[:, :2]
 
         alpha = 0.05
-        self.outline_generator = get_outline(self.points, self.projected_points, alpha)
+        self.outline_generator = get_outline(self.projected_points, alpha)
 
-        for key, line in self.outline.items():
-            self.scene.removeShape(key)
+        for key in self.outline:
+            key_str = ",".join(map(str, key))
+            self.scene.removeShape(key_str)
         self.outline.clear()
 
     @utility.show_fps

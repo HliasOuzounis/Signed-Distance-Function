@@ -9,29 +9,16 @@
 
 ### Part 3
 
-- [X] Implement Delaunay triangulation for 2D points
-- [ ] split projection and point cloud points. Retain points only if inside projection
-- [ ] Implement α-shapes to find the outline of the projection (check multiple α values)
-- [ ] Create outline_constructor
+- [ ] Implement Delaunay triangulation for 2D points
+- [X] split projection and point cloud points. Retain points only if inside projection
+- [X] Implement α-shapes to find the outline of the projection (check multiple α values)
+- [X] Create outline_constructo
 
 ### Part 4
 
 - [ ] ear clipping for polygon triangulation
 - [ ] Compute area of triangles
 - [ ] Compare with monte carlo
-
-NOTE.
-
-- every calculation is in 2D. Return to 3D for vizualisation
-  points.shape(n, 2) -> pad with plane.d on z -> points.shape(n, 3)
-  rotate such that (0, 0, -1) falls on plane.normal
-
-Speed Improvements:
-
-- project all points of the mesh to the plane
-- use Delaunay and α-shape to find points on outline
-- use ear clipping to triangulate the outline
-- much fewer triangles left (from 11k)
 
 ## Part B
 
