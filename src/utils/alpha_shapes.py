@@ -2,7 +2,7 @@ import numpy as np
 
 from vvrpywork.shapes import Triangle2D
 
-from .delaunay import get_triangulation
+from .delauney.delaunay import get_triangulation
 
 from typing import Generator
 
@@ -22,7 +22,8 @@ def get_outline(
     Yields
     - Indexes of the verices that belongs to the α-shape outline.
     """
-    # delauney_triangles = get_triangulation(projected_points)
+    delauney_triangles = get_triangulation(projected_points)
+    print("Custom Delauney Done")
     delauney_triangles = Delaunay(projected_points)
     for vertices in delauney_triangles.simplices:
         v1, v2, v3 = vertices

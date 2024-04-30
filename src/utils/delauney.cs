@@ -620,12 +620,12 @@ namespace Delaunay_triangulation
                     //         this_pt
                     //            |\         
                     //            | \    
-                    //            |    \ 
-                    //            |     \
+                    //            |  \ 
+                    //            |   \
                     //            |    \
                     //            |     \
                     //            V      V
-                    //  vertical   edge_0
+                    //        vertical   edge_0
                     //____________________________________________________________________________________
 
                     edge_to_add = get_edge_away_from_this_pt(edge_to_add); // Always add edge away from this point
