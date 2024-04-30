@@ -113,5 +113,5 @@ class PointsConstructor(Callback):
         plane2 = self.plane.vertices[-1]
         plane_area = np.linalg.norm(plane1[0] - plane2[0]) * np.linalg.norm(plane1[1] - plane2[1])
 
-        print(f"Area of projection: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2")
+        print(f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2")
         print(f"{self.intersecting.points.shape[0]} points out of {self.prev_index} points")

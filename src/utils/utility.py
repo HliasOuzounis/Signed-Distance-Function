@@ -103,7 +103,13 @@ def show_fps(func):
         t1 = time()
         result = func(*args, **kwargs)
         t2 = time()
-        print(f"Displaying at {1/(t2-t1):.2f} FPS")
+        clear_line()
+        print(f"Displaying at {1/(t2-t1):.2f} FPS", end='\r')
         return result
 
     return wrap_func
+
+def clear_line():
+    import sys
+    sys.stdout.write("\033[K")  # Clear to the end of line
+    sys.stdout.flush()

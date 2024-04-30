@@ -42,19 +42,38 @@ class OutlineConstructor(Callback):
     @utility.show_fps
     def animate(self) -> bool:
         steps = 100
-        try:
-            for i in range(steps):
-                new_line = next(self.outline_generator)
-                if new_line[::-1] in self.outline:
-                    new_line_str = ",".join(map(str, new_line[::-1]))
-                    self.scene.removeShape(new_line_str)
-                    self.outline.pop(new_line[::-1])
-                else:
-                    new_line_str = ",".join(map(str, new_line))
-                    self.outline[new_line] = Line3D(self.points[new_line[0]], self.points[new_line[1]], width=2)
-                    self.scene.addShape(self.outline[new_line], new_line_str)
-        except StopIteration:
-            self.stop_animate()
-            return True
+        
+        outline_batch = GeneratorBatcher(self.outline_generator, steps)
 
+        for next_line in outline_batch:
+            old_line = next_line[::-1]
+            if old_line in self.outline:
+                old_line_str = ",".join(map(str, old_line))
+                self.scene.removeShape(old_line_str)
+                self.outline.pop(old_line)
+            else:
+                next_line_str = ",".join(map(str, next_line))
+                self.outline[next_line] = Line3D(self.points[next_line[0]], self.points[next_line[1]], width=2)
+                self.scene.addShape(self.outline[next_line], next_line_str)
+        
+        if outline_batch.value is not None:
+            print(f"Area of projection using Outline: {outline_batch.value:.4f} units^2")
+            self.stop_animate()
+            
         return True
+
+class GeneratorBatcher:
+    def __init__(self, generator, batch_size) -> None:
+        self.generator = generator
+        self.idx = 0
+        self.batch_size = batch_size
+        self.value = None
+        
+    def __iter__(self):
+        for i in range(self.batch_size):
+            try:
+                yield next(self.generator)
+            except StopIteration as s:
+                self.value = s.value
+                break
+        

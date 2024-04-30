@@ -598,6 +598,20 @@ class Triangle2D(Shape):
         '''
         return (self.getPoint1(), self.getPoint2(), self.getPoint3())
     
+    def getArea(self) -> float:
+        '''Returns the triangle's area.
+        
+        Returns:
+            The triangle's area.
+        '''
+        a = self.getPoint1().distance(self.getPoint2())
+        b = self.getPoint2().distance(self.getPoint3())
+        c = self.getPoint3().distance(self.getPoint1())
+        
+        s = (a + b + c) / 2
+        
+        return (s * (s - a) * (s - b) * (s - c)) ** 0.5
+    
     def getCircumCircle(self) -> Circle2D:
         '''Returns the triangle's circumcircle.
         
