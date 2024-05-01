@@ -19,7 +19,7 @@ class PointsConstructor(Callback):
         self.non_intersecting = PointSet3D()
         self.non_intersecting_name = "non-intersecting points"
 
-        self.total_points = 10000
+        self.total_points = 20000
         self.step = 1 / 100
 
     def animate_init(self) -> None:
