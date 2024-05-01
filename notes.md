@@ -14,12 +14,18 @@
 - [X] Implement α-shapes to find the outline of the projection (check multiple α values)
 - [X] Create outline_constructo
 
-### Part 4
+### ~~Part 4~~
 
-- [ ] ear clipping for polygon triangulation
-- [ ] Compute area of triangles
-- [ ] Compare with monte carlo
+- [X] Compute area of triangles
+- [X] Compare with monte carlo
 
 ## Part B
 
-...
+### Part 5
+
+* [X] Change intersection algorithm to count intersections. Assume ray coming out from point torwards +z. If > 0 and % 2 == 1, point is inside
+
+### Part 6
+
+
+### Part 7
