@@ -2624,7 +2624,7 @@ class PointSet3D(ShapeSet):
         Args:
             point: The `Point3D` object to append.
         '''
-        self._points = np.append(self._points, [point.x, point.y, point.z], axis=0)
+        self._points = np.append(self._points, [[point.x, point.y, point.z]], axis=0)
         self._colors = np.append(self._colors, [[*point.color, 1] if len(point.color) == 3 else [*point.color]], axis=0)
 
     def createRandom(self, bound:Cuboid3D, num_points:int, seed:None|int|str=None, color:ColorType=(0, 0, 0)):
