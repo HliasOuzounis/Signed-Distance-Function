@@ -42,7 +42,7 @@ class PointsConstructor(Callback):
 
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
-        # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, self.inv_rot_mat))
+        self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, self.inv_rot_mat))
         self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
 
         self.intersecting.clear()
@@ -75,15 +75,16 @@ class PointsConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
-            # self.scene.removeShape(self.intersecting_name)
-            # self.scene.removeShape(self.non_intersecting_name)
+            self.scene.removeShape(self.non_intersecting_name)
             self.estimate_area()
             self.stop_animate()
+            return True
 
         index = int(self.l * self.total_points)
 
-        # interecting_points_indexes = self.triangle_params.check_points(self.random_points[self.prev_index : index + 1])
-        interecting_points_indexes = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1])  # ~ 2 times faster
+        # interecting_points = self.triangle_params.check_points(self.random_points[self.prev_index : index + 1])
+        interecting_points = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1]) # ~ 2 times faster
+        interecting_points_indexes = interecting_points > 0
 
         self.non_intersecting_points = np.concatenate([
             self.non_intersecting_points[(self.prev_index - index) * 4:],

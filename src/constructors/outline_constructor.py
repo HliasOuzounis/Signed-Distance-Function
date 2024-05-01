@@ -65,12 +65,11 @@ class OutlineConstructor(Callback):
 class GeneratorBatcher:
     def __init__(self, generator, batch_size) -> None:
         self.generator = generator
-        self.idx = 0
         self.batch_size = batch_size
         self.value = None
         
     def __iter__(self):
-        for i in range(self.batch_size):
+        for _ in range(self.batch_size):
             try:
                 yield next(self.generator)
             except StopIteration as s:

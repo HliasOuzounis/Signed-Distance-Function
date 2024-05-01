@@ -3,6 +3,7 @@ import numpy as np
 class TriangleParams:
     def __init__(self, triangles, points) -> None:
         # project onto plane
+        self.triangles_d = np.max(points[:, 2][triangles], axis=1)
         points = points[:, :2]
         triangles = points[triangles]
 
@@ -25,8 +26,9 @@ class TriangleParams:
         u = (self.dot11 * dot20 - self.dot01 * dot21) * self.inv_denom
         v = (self.dot00 * dot21 - self.dot01 * dot20) * self.inv_denom
 
-        inside = (u >= 0) & (v >= 0) & (u + v <= 1)
-        return inside.any(axis=1)
+        before = points[:, np.newaxis, 2] < self.triangles_d
+        inside = (u >= 0) & (v >= 0) & (u + v <= 1) & before
+        return np.sum(inside, axis=1)
 
 
 class Node:
@@ -41,21 +43,21 @@ class Node:
 
     def check_intersection(self, points: np.array):
         if points.shape[0] == 0:
-            return np.zeros(0, dtype=bool)
+            return np.zeros(0)
 
         intersects = self.intersecting_triangles.check_points(points)
 
         on_right = self.is_on_right(points)
 
-        interescts_right = np.zeros_like(intersects, dtype=bool)
+        interescts_right = np.zeros_like(intersects)
         if self.right is not None:
-            interescts_right[on_right & ~intersects] = self.right.check_intersection(points[on_right & ~intersects])
+            interescts_right[on_right] = self.right.check_intersection(points[on_right])
 
-        interescts_left = np.zeros_like(intersects, dtype=bool)
+        interescts_left = np.zeros_like(intersects)
         if self.left is not None:
-            interescts_left[~on_right & ~intersects] = self.left.check_intersection(points[~on_right & ~intersects])
+            interescts_left[~on_right] = self.left.check_intersection(points[~on_right])
 
-        return intersects | interescts_right | interescts_left
+        return intersects + interescts_right + interescts_left
 
     def is_on_right(self, points: np.array):
         points = points[:, :2]
@@ -64,7 +66,7 @@ class Node:
 
 class KDTree:
     def __init__(self, points, triangles) -> None:
-        self.all_points = points[:, :2]
+        self.all_points = points
         self.triangles = triangles
         self.root = self.build_tree(self.all_points, self.triangles)
 
