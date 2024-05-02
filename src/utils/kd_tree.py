@@ -1,6 +1,6 @@
 import numpy as np
 
-# matrices to shift values in array. shift @ array
+# matrices to shift values in nx3 array. array @ shift
 shift1 = np.array([[0, 1, 0], [0, 0, 1], [0, 0, 0]])
 shift2 = np.array([[1, 0, 0], [0, 0, 1], [0, 0, 0]])
 shift3 = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 0]])
@@ -75,9 +75,9 @@ class Node:
 
         for i in range(3):
             besti = b[i]
-            best_nodes[besti] = best_nodes[besti] @ shift[i]
+            best_nodes[besti] @= shift[i]
             best_nodes[besti, i] = self.idx
-            distances[besti] = distances[besti] @ shift[i]
+            distances[besti] @= shift[i]
             distances[besti, i] = distance_with_current[besti]
         
 
