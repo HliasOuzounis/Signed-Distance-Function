@@ -1,13 +1,10 @@
 import numpy as np
 
-from .callback import Callback
+from .callback import Callback, Scene3D, SequenceHandler
 
 from vvrpywork.shapes import PointSet3D, Line3D, Scene3D
 
-from ..utils.alpha_shapes import get_outline
-from ..utils import utility
-
-from ..sequence_handler import SequenceHandler
+from ..utils import alpha_shapes, utility
 
 class OutlineConstructor(Callback):
     def __init__(self, intesecting_points: PointSet3D) -> None:
@@ -34,7 +31,7 @@ class OutlineConstructor(Callback):
         self.projected_points = np.dot(self.points, inv_rot_mat)[:, :2]
 
         alpha = 3e-2
-        self.outline_generator = get_outline(self.projected_points, alpha)
+        self.outline_generator = alpha_shapes.get_outline(self.projected_points, alpha)
 
         for key in self.outline:
             key_str = ",".join(map(str, key))
@@ -84,4 +81,3 @@ class GeneratorBatcher:
             except StopIteration as s:
                 self.value = s.value
                 break
-        

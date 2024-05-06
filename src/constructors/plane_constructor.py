@@ -1,11 +1,9 @@
 import numpy as np
 import open3d as o3d
 
-from src.sequence_handler import SequenceHandler
-from vvrpywork.scene import Scene3D
-from vvrpywork.shapes import Mesh3D, Cuboid3D, Cuboid3DGeneralized
+from vvrpywork.shapes import Mesh3D
 
-from .callback import Callback
+from .callback import Callback, SequenceHandler, Scene3D
 
 class PlaneConstructor(Callback):
     def __init__(self, mesh: Mesh3D) -> None:

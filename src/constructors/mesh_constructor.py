@@ -1,10 +1,8 @@
 import numpy as np
 
-from src.sequence_handler import SequenceHandler
-from vvrpywork.scene import Scene3D
 from vvrpywork.shapes import Mesh3D
 
-from .callback import Callback
+from .callback import Callback, Scene3D, SequenceHandler
 from ..utils import utility
 
 

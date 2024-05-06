@@ -1,11 +1,9 @@
 import numpy as np
 
-from src.sequence_handler import SequenceHandler
-from vvrpywork.scene import Scene3D
-from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D, Point3D
+from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
 
-from .callback import Callback
-from ..utils.kd_tree import KDTree, TriangleParams
+from .callback import Callback, Scene3D, SequenceHandler
+from ..utils import KDTree, TriangleParams
 from ..utils import utility
 
 
