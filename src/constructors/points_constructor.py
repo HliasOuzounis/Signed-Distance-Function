@@ -1,5 +1,7 @@
 import numpy as np
 
+from src.sequence_handler import SequenceHandler
+from vvrpywork.scene import Scene3D
 from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D, Point3D
 
 from .callback import Callback
@@ -62,41 +64,47 @@ class PointsConstructor(Callback):
         self.scene.removeShape(self.non_intersecting_name)
         self.random_points = self.non_intersecting.points
 
-        mesh_v = self.mesh.vertices
-        n = int(100_000 ** (1/3))
-
-        xmin = np.min(mesh_v[:, 0])
-        xmax = np.max(mesh_v[:, 0])
-        x = np.linspace(xmin, xmax, n)
-
-        ymin = np.min(mesh_v[:, 1])
-        ymax = np.max(mesh_v[:, 1])
-        y = np.linspace(ymin, ymax, n)
-
-        zmin = np.min(mesh_v[:, 2])
-        zmax = np.max(mesh_v[:, 2])
-        z = np.linspace(zmin, zmax, n)
-
-        xx, yy, zz = np.meshgrid(x, y, z)
-        grid = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
-
-        triangles = set(map(tuple, self.mesh.triangles))
-
-        import time
-        t1 = time.time()
-        print("Starting", grid.shape[0])
-        c, d = self.kd_tree.nearest3(grid)
-        print("Time", time.time() - t1)
+        # mesh_v = self.mesh.vertices
+        # n = int(10_000 ** (1/3))
         
-        pc = PointSet3D(np.array([[0, 0, 0]]), size=2)
-        for i, ci in enumerate(c):
-            from itertools import permutations
-            if any((i, j, k) in triangles for i, j, k in permutations(ci, 3)):
-                pc.add(Point3D(grid[i], color=[0, 1, 0]))
-            else:
-                pc.add(Point3D(grid[i], color=[d[i, 0], 0, d[i, 0]]))
-        self.scene.addShape(pc)
+        # offset = 0.1
+
+        # xmin = np.min(mesh_v[:, 0]) - offset
+        # xmax = np.max(mesh_v[:, 0]) + offset
+        # x = np.linspace(xmin, xmax, n)
+
+        # ymin = np.min(mesh_v[:, 1]) - offset
+        # ymax = np.max(mesh_v[:, 1]) + offset
+        # y = np.linspace(ymin, ymax, n)
+
+        # zmin = np.min(mesh_v[:, 2]) - offset
+        # zmax = np.max(mesh_v[:, 2]) + offset
+        # z = np.linspace(zmin, zmax, n)
+
+        # xx, yy, zz = np.meshgrid(x, y, z)
+        # grid = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
         
+
+        # triangles = set(map(tuple, self.mesh.triangles))
+
+        # import time
+        # t1 = time.time()
+        # print("Starting", grid.shape[0])
+        # # c, d = self.kd_tree.nearest3(grid @ self.inv_rot_mat)
+        # print("Time", time.time() - t1)
+
+        # t1 = time.time()
+        # print("Starting", grid.shape[0])
+        # is_inside = self.kd_tree.is_inside(grid @ self.inv_rot_mat)
+        # print("Time", time.time() - t1)
+
+        # pc = PointSet3D(np.array([[0, 0, 0]]), size=1)
+        # # for i, (ci, ins) in enumerate(zip(c, is_inside)):
+        # for i, ins in enumerate(is_inside):
+        #     if not ins:
+        #         continue
+        #     pc.add(Point3D(grid[i], color=[1, 0, 0] if not ins else [0, 0, 1]))
+        # self.scene.addShape(pc)
 
         self.non_intersecting.clear()
         self.non_intersecting_points = np.empty((0, 3))
@@ -155,3 +163,9 @@ class PointsConstructor(Callback):
 
         print(f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2")
         print(f"{self.intersecting.points.shape[0]} points out of {self.prev_index} points")
+
+    def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
+        self.l = 0
+        scene.removeShape(self.intersecting_name)
+        scene.removeShape(self.non_intersecting_name)
+        return True        

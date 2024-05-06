@@ -7,6 +7,7 @@ from src.constructors import (
     PlaneConstructor,
     PointsConstructor,
     OutlineConstructor,
+    ClearCallback
 )
 
 from vvrpywork import scene, shapes
@@ -49,9 +50,13 @@ class Window(scene.Scene3D):
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = pointsConstructor
         
-        # Task 3: Calculate outline of the projected points
+        # Task 3: Calculate outline of the projected points & Task 4: Calculate area of projection
         outlineConstructor = OutlineConstructor(pointsConstructor.intersecting)
         pointsConstructor.next_animation = outlineConstructor
+        
+        # Clear the scene for part B
+        clear = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
+        outlineConstructor.next_animation = clear
 
 
 if __name__ == "__main__":

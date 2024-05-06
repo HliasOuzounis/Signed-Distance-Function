@@ -1,6 +1,8 @@
 import numpy as np
 import open3d as o3d
 
+from src.sequence_handler import SequenceHandler
+from vvrpywork.scene import Scene3D
 from vvrpywork.shapes import Mesh3D, Cuboid3D, Cuboid3DGeneralized
 
 from .callback import Callback
@@ -86,3 +88,9 @@ class PlaneConstructor(Callback):
         self.plane.vertices = (self.plane.vertices @ R.T)
 
         self.scene.updateShape(self.plane_name)
+
+    
+    def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
+        self.l = 0
+        scene.removeShape(self.plane_name)
+        return True

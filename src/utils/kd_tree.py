@@ -11,12 +11,13 @@ class TriangleParams:
     def __init__(self, triangles, points) -> None:
         # project onto plane
         self.triangles_d = np.max(points[:, 2][triangles], axis=1)
-        points = points[:, :2]
         triangles = points[triangles]
 
-        self.v0, v1, v2 = triangles[:, 0, :], triangles[:, 1, :], triangles[:, 2, :]
-        self.edge1 = v1 - self.v0
-        self.edge2 = v2 - self.v0
+        self.v0, self.v1, self.v2 = triangles[:, 0, :], triangles[:, 1, :], triangles[:, 2, :]
+        self.proj_v0 = self.v0[:, :2]
+        self.edge1 = self.v1[:, :2] - self.v0[:, :2]
+        self.edge2 = self.v2[:, :2] - self.v0[:, :2]
+
 
         self.dot00 = np.einsum("ij,ij->i", self.edge1, self.edge1)
         self.dot01 = np.einsum("ij,ij->i", self.edge1, self.edge2)
@@ -24,17 +25,24 @@ class TriangleParams:
 
         self.inv_denom = 1 / (self.dot00 * self.dot11 - self.dot01 * self.dot01)
 
-    def check_points(self, points):
-        vp = points[:, np.newaxis, :2] - self.v0
+    def check_points(self, points, count_intersections=False):
+        vp = points[:, np.newaxis, :2] - self.v0[:, :2]
 
         dot20 = np.einsum("ijk,jk->ij", vp, self.edge1)
         dot21 = np.einsum("ijk,jk->ij", vp, self.edge2)
+        # print(self.edge1.shape, vp.shape, dot20.shape)
 
         u = (self.dot11 * dot20 - self.dot01 * dot21) * self.inv_denom
         v = (self.dot00 * dot21 - self.dot01 * dot20) * self.inv_denom
+        w = 1 - u - v
 
-        before = points[:, np.newaxis, 2] < self.triangles_d
-        inside = (u >= 0) & (v >= 0) & (u + v <= 1) & before
+        valid = np.ones_like(u, dtype=bool)
+        if count_intersections:
+            # find which intersecting points in 3d are after the start of the ray (going to +z)
+            intersection_p = u * self.v0[:, 2] + v * self.v1[:, 2] + w * self.v2[:, 2]
+            valid = (intersection_p.T > points[:, 2]).T
+            
+        inside = (u >= 0) & (v >= 0) & (w >= 0) & valid
         return np.sum(inside, axis=1)
 
 
@@ -106,27 +114,29 @@ class Node:
 
 
 class TrianglesNode(Node):
-    def __init__(
-        self, points, value: np.array, line: np.array, intersecting_triangles: np.array
-    ) -> None:
+    def __init__(self, points, value: np.array, line: np.array, intersecting_triangles: np.array) -> None:
         super().__init__(value, line)
         self.intersecting_triangles = TriangleParams(intersecting_triangles, points)
 
-    def check_intersection(self, points: np.array):
+    def check_intersection(self, points: np.array, count_intersections=False):
         if points.shape[0] == 0:
             return np.zeros(0)
 
-        intersects = self.intersecting_triangles.check_points(points)
+        intersects = self.intersecting_triangles.check_points(points, count_intersections)
+        if not count_intersections:
+            intersects = intersects > 0
 
         on_right = self.is_on_right(points)
-
+        
         interescts_right = np.zeros_like(intersects)
+        right_condition = on_right if count_intersections else (on_right & ~intersects)
         if self.right is not None:
-            interescts_right[on_right] = self.right.check_intersection(points[on_right])
+            interescts_right[right_condition] = self.right.check_intersection(points[right_condition], count_intersections)
 
         interescts_left = np.zeros_like(intersects)
+        left_condition = ~on_right if count_intersections else (~on_right & ~intersects)
         if self.left is not None:
-            interescts_left[~on_right] = self.left.check_intersection(points[~on_right])
+            interescts_left[left_condition] = self.left.check_intersection(points[left_condition], count_intersections)
 
         return intersects + interescts_right + interescts_left
 
@@ -210,6 +220,10 @@ class KDTree:
 
     def intersects_mesh(self, points: np.array):
         return self.troot.check_intersection(points)
+
+    def is_inside(self, points: np.array):
+        intersections = self.troot.check_intersection(points, count_intersections=True)
+        return intersections % 2 == 1
 
     def nearest3(self, points: np.array):
         n = points.shape[0]

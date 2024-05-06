@@ -2,10 +2,12 @@ import numpy as np
 
 from .callback import Callback
 
-from vvrpywork.shapes import PointSet3D, Line3D
+from vvrpywork.shapes import PointSet3D, Line3D, Scene3D
 
 from ..utils.alpha_shapes import get_outline
 from ..utils import utility
+
+from ..sequence_handler import SequenceHandler
 
 class OutlineConstructor(Callback):
     def __init__(self, intesecting_points: PointSet3D) -> None:
@@ -60,6 +62,13 @@ class OutlineConstructor(Callback):
             print(f"Area of projection using Outline: {outline_batch.value:.4f} units^2")
             self.stop_animate()
             
+        return True
+    
+    def clear(self, _sequence: SequenceHandler, _scene: Scene3D) -> bool:
+        for key in self.outline:
+            key_str = ",".join(map(str, key))
+            self.scene.removeShape(key_str)
+        self.outline.clear()
         return True
 
 class GeneratorBatcher:

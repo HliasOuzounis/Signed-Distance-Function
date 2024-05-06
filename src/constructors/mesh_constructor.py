@@ -1,5 +1,7 @@
 import numpy as np
 
+from src.sequence_handler import SequenceHandler
+from vvrpywork.scene import Scene3D
 from vvrpywork.shapes import Mesh3D
 
 from .callback import Callback
@@ -48,4 +50,9 @@ class MeshConstructor(Callback):
 
         self.scene.updateShape(self.mesh_id)
 
+        return True
+
+    def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
+        self.l = 0
+        scene.removeShape(self.mesh_id)
         return True

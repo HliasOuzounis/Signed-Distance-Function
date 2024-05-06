@@ -28,7 +28,6 @@ class Callback(ABC):
         self.scene.window.set_on_tick_event(self.animate)
         sequence.next_animation = self.skip
         sequence.curr_animation = self
-        
 
     def animate_init(self) -> None:
         """
@@ -51,6 +50,13 @@ class Callback(ABC):
         self.l = 1
         return
 
+    # @abstractmethod
+    def clear(self, _sequence: SequenceHandler, _scene: Scene3D) -> bool:
+        """
+        Clear the current animation
+        """
+        raise NotImplementedError("Clear not implemented")
+
     @abstractmethod
     def animate(self) -> bool:
         """
@@ -70,7 +76,7 @@ class Callback(ABC):
         return self._next_animation
 
     @next_animation.setter
-    def next_animation(self, next):
-        if not isinstance(next, Callback):
-            raise TypeError("next_animation must be a Callback object")
-        self._next_animation = next
+    def next_animation(self, next_anim):
+        if not callable(next_anim):
+            raise TypeError("next_animation must be callable")
+        self._next_animation = next_anim
