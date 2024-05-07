@@ -8,7 +8,7 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, kd_tree: KDTree) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -18,6 +18,8 @@ class PointsConstructor(Callback):
         self.intersecting_name = "intersecting points"
         self.non_intersecting = PointSet3D()
         self.non_intersecting_name = "non-intersecting points"
+        
+        self.kd_tree = kd_tree
 
         self.total_points = 15000
         self.step = 1 / 100
@@ -37,13 +39,13 @@ class PointsConstructor(Callback):
             if plane_normal[2] != 1
             else np.eye(3)
         )
-        self.inv_rot_mat = np.linalg.inv(self.rot_mat)
+        inv_rot_mat = np.linalg.inv(self.rot_mat)
         rotated_plane_verts = np.dot(self.plane.vertices, self.rot_mat.T)
 
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
-        self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, self.inv_rot_mat))
-        self.kd_tree = KDTree(np.dot(self.mesh.vertices, self.inv_rot_mat), self.mesh.triangles)
+        # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, inv_rot_mat))
+        self.kd_tree.build_tree(np.dot(self.mesh.vertices, inv_rot_mat), self.mesh.triangles)
 
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
@@ -61,48 +63,6 @@ class PointsConstructor(Callback):
         self.non_intersecting.remove_duplicated_points()
         self.scene.removeShape(self.non_intersecting_name)
         self.random_points = self.non_intersecting.points
-
-        # mesh_v = self.mesh.vertices
-        # n = int(10_000 ** (1/3))
-        
-        # offset = 0.1
-
-        # xmin = np.min(mesh_v[:, 0]) - offset
-        # xmax = np.max(mesh_v[:, 0]) + offset
-        # x = np.linspace(xmin, xmax, n)
-
-        # ymin = np.min(mesh_v[:, 1]) - offset
-        # ymax = np.max(mesh_v[:, 1]) + offset
-        # y = np.linspace(ymin, ymax, n)
-
-        # zmin = np.min(mesh_v[:, 2]) - offset
-        # zmax = np.max(mesh_v[:, 2]) + offset
-        # z = np.linspace(zmin, zmax, n)
-
-        # xx, yy, zz = np.meshgrid(x, y, z)
-        # grid = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
-        
-
-        # triangles = set(map(tuple, self.mesh.triangles))
-
-        # import time
-        # t1 = time.time()
-        # print("Starting", grid.shape[0])
-        # # c, d = self.kd_tree.nearest3(grid @ self.inv_rot_mat)
-        # print("Time", time.time() - t1)
-
-        # t1 = time.time()
-        # print("Starting", grid.shape[0])
-        # is_inside = self.kd_tree.is_inside(grid @ self.inv_rot_mat)
-        # print("Time", time.time() - t1)
-
-        # pc = PointSet3D(np.array([[0, 0, 0]]), size=1)
-        # # for i, (ci, ins) in enumerate(zip(c, is_inside)):
-        # for i, ins in enumerate(is_inside):
-        #     if not ins:
-        #         continue
-        #     pc.add(Point3D(grid[i], color=[1, 0, 0] if not ins else [0, 0, 1]))
-        # self.scene.addShape(pc)
 
         self.non_intersecting.clear()
         self.non_intersecting_points = np.empty((0, 3))

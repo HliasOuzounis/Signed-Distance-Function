@@ -10,6 +10,8 @@ from src.constructors import (
     ClearCallback
 )
 
+from src.utils import KDTree
+
 from vvrpywork import scene, shapes
 
 mesh = shapes.Mesh3D("models/DuckMesh.ply")
@@ -43,9 +45,11 @@ class Window(scene.Scene3D):
         # Task 1: Create the mesh
         meshConstructor = MeshConstructor(self.mesh)
         self.sequenceHandler.next_animation = meshConstructor
+        
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
+        kd_tree = KDTree()
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, kd_tree)
 
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = pointsConstructor
@@ -57,6 +61,9 @@ class Window(scene.Scene3D):
         # Clear the scene for part B
         clear = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
         outlineConstructor.next_animation = clear
+        
+        # inf loop
+        clear.next_animation = planeConstructor
 
 
 if __name__ == "__main__":
