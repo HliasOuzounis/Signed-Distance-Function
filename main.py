@@ -7,10 +7,9 @@ from src.constructors import (
     PlaneConstructor,
     PointsConstructor,
     OutlineConstructor,
-    ClearCallback
+    ClearCallback,
+    SDFConstructor
 )
-
-from src.utils import KDTree
 
 from vvrpywork import scene, shapes
 
@@ -47,9 +46,8 @@ class Window(scene.Scene3D):
         self.sequenceHandler.next_animation = meshConstructor
         
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
-        kd_tree = KDTree()
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, kd_tree)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane)
 
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = pointsConstructor
@@ -62,8 +60,17 @@ class Window(scene.Scene3D):
         clear = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
         outlineConstructor.next_animation = clear
         
+        # Task 5: Check if point is inside or outside the mesh
+        # Task 6: Calculate min distance to mesh
+        # Task 7: Create SDF function
+        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
+        sdf_constructor = SDFConstructor(meshConstructor.mesh, pointsConstructor.kd_tree)
+        meshConstructor.next_animation = sdf_constructor
+        
+        clear.next_animation = sdf_constructor
+        
         # inf loop
-        clear.next_animation = planeConstructor
+        # clear.next_animation = planeConstructor
 
 
 if __name__ == "__main__":

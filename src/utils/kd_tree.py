@@ -89,10 +89,12 @@ class KDTree:
     def __init__(self) -> None:
         self.all_points = np.empty((0, 3))
         self.troot = None
+        self.inv_rot_mat = np.eye(3)
     
-    def build_tree(self, points, triangles):
-        self.all_points = points
-        self.troot = self._build_tree(points, triangles)
+    def build_tree(self, points, triangles, inv_rot_mat):
+        self.inv_rot_mat = inv_rot_mat
+        self.all_points = np.dot(points, inv_rot_mat)
+        self.troot = self._build_tree(self.all_points, triangles)
 
     def _build_tree(self, points, triangles, depth=0) -> TrianglesNode:
         if triangles.shape[0] == 0:
@@ -129,8 +131,10 @@ class KDTree:
 
         return tv
     def intersects_mesh(self, points: np.array):
+        points = np.dot(points, self.inv_rot_mat)
         return self.troot.check_intersection(points)
 
     def is_inside(self, points: np.array):
+        points = np.dot(points, self.inv_rot_mat)
         intersections = self.troot.check_intersection(points, count_intersections=True)
         return intersections % 2 == 1

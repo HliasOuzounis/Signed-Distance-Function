@@ -52,7 +52,7 @@ class OutlineConstructor(Callback):
                 self.outline.pop(old_line)
             else:
                 next_line_str = ",".join(map(str, next_line))
-                self.outline[next_line] = Line3D(self.points[next_line[0]], self.points[next_line[1]], width=2)
+                self.outline[next_line] = Line3D(self.points[next_line[0]], self.points[next_line[1]], width=1.5)
                 self.scene.addShape(self.outline[next_line], next_line_str)
         
         if outline_batch.value is not None:

@@ -7,9 +7,7 @@ from typing import Generator
 from scipy.spatial import Delaunay
 
 
-def get_outline(
-    projected_points: np.array, alpha: float
-) -> Generator[None, tuple[int, int], float]:
+def get_outline(projected_points: np.array, alpha: float) -> Generator[None, tuple[int, int], float]:
     """
     Generator that returns indexes of points that define the α-shape outline of the given points.
 
@@ -22,7 +20,6 @@ def get_outline(
     """
     
     area: float = 0
-    
     delauney_triangles = Delaunay(projected_points)
     for vertices in delauney_triangles.simplices:
         v1, v2, v3 = vertices

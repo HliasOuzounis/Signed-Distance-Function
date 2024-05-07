@@ -5,7 +5,6 @@ class ClearCallback(Callback):
         super().__init__()
         self.callbacks = callbacks
 
-
     def animate(self) -> bool:
         for callback in self.callbacks:
             callback.clear(callback.sequence, callback.scene)

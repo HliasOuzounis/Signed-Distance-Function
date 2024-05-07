@@ -8,7 +8,7 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D, kd_tree: KDTree) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -19,7 +19,7 @@ class PointsConstructor(Callback):
         self.non_intersecting = PointSet3D()
         self.non_intersecting_name = "non-intersecting points"
         
-        self.kd_tree = kd_tree
+        self.kd_tree = KDTree()
 
         self.total_points = 15000
         self.step = 1 / 100
@@ -45,7 +45,7 @@ class PointsConstructor(Callback):
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
         # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, inv_rot_mat))
-        self.kd_tree.build_tree(np.dot(self.mesh.vertices, inv_rot_mat), self.mesh.triangles)
+        self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
@@ -53,8 +53,8 @@ class PointsConstructor(Callback):
         self.non_intersecting.clear()
         self.non_intersecting.createRandom(
             Cuboid3D(
-                rotated_plane_verts[0]  - np.array([0, 0, 0.0001]),
-                rotated_plane_verts[-1] + np.array([0, 0, 0.0001]),
+                rotated_plane_verts[0] ,
+                rotated_plane_verts[-1],
             ),
             self.total_points,
         )
@@ -62,7 +62,7 @@ class PointsConstructor(Callback):
         self.scene.addShape(self.non_intersecting, self.non_intersecting_name)
         self.non_intersecting.remove_duplicated_points()
         self.scene.removeShape(self.non_intersecting_name)
-        self.random_points = self.non_intersecting.points
+        self.random_points = np.dot(self.non_intersecting.points, self.rot_mat)
 
         self.non_intersecting.clear()
         self.non_intersecting_points = np.empty((0, 3))
@@ -90,7 +90,7 @@ class PointsConstructor(Callback):
 
         self.non_intersecting_points = np.concatenate([
             self.non_intersecting_points[(self.prev_index - index) * 4:],
-            np.dot(self.random_points[self.prev_index : index + 1][~interecting_points_indexes], self.rot_mat),
+            self.random_points[self.prev_index : index + 1][~interecting_points_indexes]
         ], axis=0)
 
         self.non_intersecting.points = self.non_intersecting_points
@@ -98,7 +98,7 @@ class PointsConstructor(Callback):
 
         self.intersecting_points = np.concatenate([
             self.intersecting_points,
-            np.dot(self.random_points[self.prev_index : index + 1][interecting_points_indexes], self.rot_mat),
+            self.random_points[self.prev_index : index + 1][interecting_points_indexes]
         ], axis=0)
 
         self.intersecting.points = self.intersecting_points            
