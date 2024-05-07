@@ -14,11 +14,12 @@ class SDFConstructor(Callback):
         self.mesh = mesh
         self.kd_tree = kd_tree
 
-        total_points = 10_000
-        point_per_axis = int(total_points ** (1 / 3))
+        self.total_points = 25_000
+        point_per_axis = int(self.total_points ** (1 / 3))
+        self.total_points = point_per_axis ** 3
         self.step = 1 / 100
 
-        offset = 0.1
+        offset = 0.01
 
         xmin = np.min(self.mesh.vertices[:, 0]) - offset
         xmax = np.max(self.mesh.vertices[:, 0]) + offset
@@ -41,13 +42,13 @@ class SDFConstructor(Callback):
         self.l = 0
         self.prev_index = 0
 
-        self.grid_cloud = PointSet3D(np.zeros((1, 3)), size=1)
-        self.grid_cloud.colors = np.empty((0, 3))
+        self.grid_cloud = PointSet3D(np.zeros((1, 3)), size=0.5)
+        self.grid_colors = np.zeros((self.total_points, 3))
 
         self.scene.removeShape(self.grid_cloud_name)
         self.scene.addShape(self.grid_cloud, self.grid_cloud_name)
 
-    # @utility.show_fps
+    @utility.show_fps
     def animate(self) -> bool:
         self.l += self.step
 
@@ -58,22 +59,16 @@ class SDFConstructor(Callback):
 
         inside = self.kd_tree.is_inside(self.grid[self.prev_index : index + 1])
 
-        colors = np.zeros((inside.shape[0], 3))
-        colors[inside] = np.array([[0, 0, 1]])
-        colors[~inside] = np.array([[1, 0, 0]])
+        self.grid_colors[self.prev_index : index + 1][inside] = np.array([[0, 0, 1]])
+        self.grid_colors[self.prev_index : index + 1][~inside] = np.array([[1, 0, 0]])
 
         self.grid_cloud.points = self.grid[: index + 1]
-        self.grid_cloud.colors = np.concatenate([self.grid_cloud.colors[1:, :3], colors], axis=0)
-        # self.grid_cloud.colors = np.zeros((self.grid_cloud.points.shape[0], 3))
-        print(self.grid_cloud.colors)
-
-        print(self.grid_cloud.points.shape[0], self.grid_cloud.colors.shape[0])
-        print(f"{colors.shape[0]=}, {inside.shape[0]=}, {index=}, {self.prev_index=}")
-        print(self.grid_cloud.colors[0])
+        self.grid_cloud.colors = self.grid_colors[: index + 1]
 
         self.scene.updateShape(self.grid_cloud_name)
 
         self.prev_index = index
+
 
         return True
 

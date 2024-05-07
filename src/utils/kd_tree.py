@@ -46,8 +46,6 @@ class TriangleParams:
         return np.sum(inside, axis=1)
 
 
-
-
 class TrianglesNode():
     def __init__(self, points, value: np.array, line: np.array, intersecting_triangles: np.array) -> None:
         self.value = value
