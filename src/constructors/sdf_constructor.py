@@ -17,7 +17,7 @@ class SDFConstructor(Callback):
         self.total_points = 25_000
         point_per_axis = int(self.total_points ** (1 / 3))
         self.total_points = point_per_axis ** 3
-        self.step = 1 / 100
+        self.step = 1 / 500
 
         offset = 0.01
 
@@ -69,14 +69,4 @@ class SDFConstructor(Callback):
 
         self.prev_index = index
 
-
         return True
-
-
-# pc = PointSet3D(np.array([[0, 0, 0]]), size=1)
-# # for i, (ci, ins) in enumerate(zip(c, is_inside)):
-# for i, ins in enumerate(is_inside):
-#     if not ins:
-#         continue
-#     pc.add(Point3D(grid[i], color=[1, 0, 0] if not ins else [0, 0, 1]))
-# self.scene.addShape(pc)

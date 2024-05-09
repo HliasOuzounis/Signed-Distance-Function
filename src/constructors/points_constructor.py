@@ -3,7 +3,7 @@ import numpy as np
 from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
 
 from .callback import Callback, Scene3D, SequenceHandler
-from ..utils import KDTree, TriangleParams
+from ..utils import KDTree, TriangleParams2D
 from ..utils import utility
 
 
