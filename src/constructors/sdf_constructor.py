@@ -34,7 +34,9 @@ class SDFConstructor(Callback):
         z = np.linspace(zmin, zmax, point_per_axis)
 
         xx, yy, zz = np.meshgrid(x, y, z)
-        self.grid = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
+        self.grid_points = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
+
+        self.grid = (x, y, z)
 
         self.grid_cloud_name = "grid"
 
@@ -55,14 +57,14 @@ class SDFConstructor(Callback):
         if self.l > self.limit:
             self.stop_animate()
 
-        index = int(self.grid.shape[0] * self.l)
+        index = int(self.grid_points.shape[0] * self.l)
 
-        inside = self.kd_tree.is_inside(self.grid[self.prev_index : index + 1])
+        inside = self.kd_tree.is_inside(self.grid_points[self.prev_index : index + 1])
 
         self.grid_colors[self.prev_index : index + 1][inside] = np.array([[0, 0, 1]])
         self.grid_colors[self.prev_index : index + 1][~inside] = np.array([[1, 0, 0]])
 
-        self.grid_cloud.points = self.grid[: index + 1]
+        self.grid_cloud.points = self.grid_points[: index + 1]
         self.grid_cloud.colors = self.grid_colors[: index + 1]
 
         self.scene.updateShape(self.grid_cloud_name)

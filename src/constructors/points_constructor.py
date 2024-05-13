@@ -8,18 +8,22 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, useKDTree=False, useRayMarching=False) -> None:
         super().__init__()
 
         self.mesh = mesh
         self.plane = plane
+
+        self.useKDTree = useKDTree
+        self.useRayMarching = useRayMarching
 
         self.intersecting = PointSet3D()
         self.intersecting_name = "intersecting points"
         self.non_intersecting = PointSet3D()
         self.non_intersecting_name = "non-intersecting points"
         
-        self.kd_tree = KDTree()
+        if self.useKDTree:
+            self.kd_tree = KDTree()
 
         self.total_points = 15000
         self.step = 1 / 100
@@ -45,7 +49,8 @@ class PointsConstructor(Callback):
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
         # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, inv_rot_mat))
-        self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
+        if self.useKDTree:
+            self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
@@ -53,7 +58,7 @@ class PointsConstructor(Callback):
         self.non_intersecting.clear()
         self.non_intersecting.createRandom(
             Cuboid3D(
-                rotated_plane_verts[0] ,
+                rotated_plane_verts[0],
                 rotated_plane_verts[-1],
             ),
             self.total_points,
@@ -85,8 +90,9 @@ class PointsConstructor(Callback):
         index = int(self.l * self.total_points)
 
         # interecting_points = self.triangle_params.check_points(self.random_points[self.prev_index : index + 1])
-        interecting_points = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1]) # ~ 2 times faster
-        interecting_points_indexes = interecting_points > 0
+        if self.useKDTree:
+            interecting_points = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1]) # ~ 2 times faster
+            interecting_points_indexes = interecting_points > 0
 
         self.non_intersecting_points = np.concatenate([
             self.non_intersecting_points[(self.prev_index - index) * 4:],

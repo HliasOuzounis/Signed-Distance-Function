@@ -109,8 +109,7 @@ class TriangleParams3D:
 
         projected_on_plane = self.project_to_plane(points)
         inside = self.check_barycentric(projected_on_plane)
-        print(distance.shape, inside.shape, points.shape, projected_on_plane.shape)
-        print(np.any(inside, axis=1)[..., np.newaxis].shape, inside[:, np.newaxis].shape)
+        
         distance[inside] = self.distance_to_area(points[np.any(inside, axis=1), :], projected_on_plane[inside, :])
 
         ## projected_on_line = self.project_to_line(projected_on_plane[~inside])

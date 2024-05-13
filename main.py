@@ -44,31 +44,35 @@ class Window(scene.Scene3D):
         # Task 1: Create the mesh
         meshConstructor = MeshConstructor(self.mesh)
         self.sequenceHandler.next_animation = meshConstructor
-        
+
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, useKDTree=True)
 
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = pointsConstructor
-        
+
         # Task 3: Calculate outline of the projected points & Task 4: Calculate area of projection
         outlineConstructor = OutlineConstructor(pointsConstructor.intersecting)
         pointsConstructor.next_animation = outlineConstructor
-        
+
         # Clear the scene for part B
         clear = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
         outlineConstructor.next_animation = clear
-        
+
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
         # Task 7: Create SDF function
         sdf_constructor = SDFConstructor(meshConstructor.mesh, pointsConstructor.kd_tree)
-        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
-        meshConstructor.next_animation = sdf_constructor # skip previous tasks
-        
+        planeConstructorB = PlaneConstructor(meshConstructor.mesh)
+        pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True)
+
+        # # skip previous tasks
+        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
+        # meshConstructor.next_animation = sdf_constructor
+
         clear.next_animation = sdf_constructor
-        
+
         # inf loop
         # clear.next_animation = planeConstructor
 
