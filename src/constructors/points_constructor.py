@@ -8,7 +8,7 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D, useKDTree=False, useRayMarching=False, *sdf) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, *, useKDTree=False, useRayMarching=False, sdf: SDF|None=None) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -25,7 +25,9 @@ class PointsConstructor(Callback):
         if self.useKDTree:
             self.kd_tree = KDTree()
         if self.useRayMarching:
-            self.sdf = sdf[0]
+            if sdf is None:
+                raise ValueError("SDF function is required for ray marching")
+            self.sdf = sdf
 
         self.total_points = 15000
         self.step = 1 / 100
@@ -97,8 +99,8 @@ class PointsConstructor(Callback):
                 self.random_points[self.prev_index : index + 1]
             )
             interecting_points_indexes = interecting_points > 0
-            
-        if self.useSDF:
+
+        if self.useRayMarching:
             interecting_points = self.sdf.ray_marching(
                 self.random_points[self.prev_index : index + 1], 
                 -self.plane_normal

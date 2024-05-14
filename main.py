@@ -69,16 +69,16 @@ class Window(scene.Scene3D):
         sdf_constructor.next_animation = clearB
         
         planeConstructorB = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True)
+        pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True, sdf=sdf_constructor.sdf)
         clearB.next_animation = planeConstructorB
         planeConstructorB.next_animation = pointsConstructorB
         
         outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting)
         pointsConstructorB.next_animation = outlineConstructorB
 
-        # # skip previous tasks
-        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
-        # meshConstructor.next_animation = sdf_constructor
+        # skip previous tasks
+        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
+        meshConstructor.next_animation = sdf_constructor
 
         clear.next_animation = sdf_constructor
 

@@ -1,0 +1,178 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Wenneker Assignment
+% Structure Specification File
+% Version 2.0 (12/1/2019)
+%
+% This template originates from:
+% http://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@LaTeXTemplates.com)
+% Frits Wenneker
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\usepackage{amsmath, amsfonts, amsthm} % Math packages
+
+\usepackage{graphicx} % Required for inserting images
+\graphicspath{{Figures/}{./}} % Specifies where to look for included images (trailing slash required)
+
+\usepackage{booktabs} % Required for better horizontal rules in tables
+
+\usepackage{dirtytalk} % Required for quoting.
+
+\usepackage{float} % Added for hard placement of images.
+\usepackage{subfig}
+
+\usepackage[dvipsnames]{xcolor} % Added for extra colors.
+
+\usepackage{tikz} % For colored boxes and more.
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\usepackage{enumitem} % Required for list customisation
+\setlist{noitemsep} % No spacing between list items
+
+%----------------------------------------------------------------------------------------
+%	DOCUMENT MARGINS
+%----------------------------------------------------------------------------------------
+
+\usepackage{geometry} % Required for adjusting page dimensions and margins
+
+\geometry{
+	paper=a4paper, % Paper size, change to letterpaper for US letter size
+	top=2.5cm, % Top margin
+	bottom=3cm, % Bottom margin
+	left=3cm, % Left margin
+	right=3cm, % Right margin
+	headheight=0.75cm, % Header height
+	footskip=1.5cm, % Space from the bottom margin to the baseline of the footer
+	headsep=0.75cm, % Space from the top margin to the baseline of the header
+	%showframe, % Uncomment to show how the type block is set on the page
+}
+
+%----------------------------------------------------------------------------------------
+%  CODE LISTINGS
+%----------------------------------------------------------------------------------------
+\usepackage{minted} % Required for insertion of code
+\newminted{python}{
+    frame=lines, 
+    framesep=2mm, 
+    baselinestretch=1.2, 
+    fontsize=\footnotesize, 
+    linenos, 
+    breaklines, 
+    autogobble,
+    tabsize=4,
+    bgcolor=black!5
+} % shortcut for minter environment. Use with \begin{pythoncode} ... \end{pythoncode}
+
+%----------------------------------------------------------------------------------------
+%	FONTS & LANGUAGE
+%----------------------------------------------------------------------------------------
+
+\usepackage{fontspec, polyglossia, unicode-math} % Required for specifying custom fonts under LuaLaTeX
+
+\setmainlanguage{greek}
+\setotherlanguage{english}
+
+
+\setmainfont{GFS Didot} % Main document font
+\setsansfont{GFS Didot}
+\setmonofont{mononoki} % Font for code listings
+
+\newfontfamily\greekfont[Script=Greek]{GFS Didot}
+\newfontfamily\greekfontsf[Script=Greek]{GFS Didot}
+
+
+\newcommand{\en}[1]{\foreignlanguage{english}{#1}}
+\newcommand{\gr}[1]{\foreignlanguage{greek}{#1}} % won't need these
+
+%----------------------------------------------------------------------------------------
+%	SECTION TITLES
+%----------------------------------------------------------------------------------------
+
+\usepackage{sectsty} % Allows customising section commands
+
+\sectionfont{\vspace{6pt}\centering\normalfont\scshape} % \section{} styling
+\subsectionfont{\normalfont\bfseries} % \subsection{} styling
+\subsubsectionfont{\normalfont\itshape} % \subsubsection{} styling
+\paragraphfont{\normalfont\scshape} % \paragraph{} styling
+
+%----------------------------------------------------------------------------------------
+%	HEADERS AND FOOTERS
+%----------------------------------------------------------------------------------------
+
+\usepackage{scrlayer-scrpage} % Required for customising headers and footers
+
+\ohead*{} % Right header
+\ihead*{} % Left header
+\chead*{} % Centre header
+
+\ofoot*{} % Right footer
+\ifoot*{} % Left footer
+\cfoot*{\pagemark} % Centre footer
+
+%----------------------------------------------------------------------------------------
+%	CUSTOM COMMANDS
+%----------------------------------------------------------------------------------------
+
+\newcommand{\img}[3][htbp]{%
+    \begin{figure}[H]
+        \centering
+        \fcolorbox{black}{white}{\includegraphics[height=#3em]{#2}}
+        \ifx&#1&%
+        \else
+            \caption{#1}
+        \fi
+    \end{figure}
+}
+
+% Two images side by side
+\newcommand{\twoimgs}[4]{%
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}[b]{0.4\textwidth}
+            \fcolorbox{black}{white}{\includegraphics[width=\textwidth]{#1}}
+            \caption{#2}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[b]{0.4\textwidth}
+            \fcolorbox{black}{white}{\includegraphics[width=\textwidth]{#3}}
+            \caption{#4}
+        \end{minipage}
+    \end{figure}
+}
+
+% Better chapter formatting
+\makeatletter
+\def\@makechapterhead#1{%
+  \vspace*{50\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      %\if@mainmatter
+        %\huge\bfseries \@chapapp\space \thechapter
+        \huge\bfseries \thechapter.\space%
+        %\par\nobreak
+        %\vskip 20\p@
+      %\fi
+    \fi
+    \interlinepenalty\@M
+    \huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\makeatother
+
+
+% Extra Formatting
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0em}

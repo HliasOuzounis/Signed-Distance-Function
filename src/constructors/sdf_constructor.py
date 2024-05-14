@@ -85,4 +85,4 @@ class SDFConstructor(Callback):
         return True
 
     def calulate_distanes(self, points: np.array) -> np.array:
-        return np.empty(points.shape[0])
+        return np.empty((points.shape[0], 1))
