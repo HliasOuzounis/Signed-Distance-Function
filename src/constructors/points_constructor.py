@@ -47,8 +47,8 @@ class PointsConstructor(Callback):
             if self.plane_normal[2] != 1
             else np.eye(3)
         )
-        inv_rot_mat = np.linalg.inv(self.rot_mat)
-        rotated_plane_verts = np.dot(self.plane.vertices, self.rot_mat.T)
+        inv_rot_mat = self.rot_mat.T
+        rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system

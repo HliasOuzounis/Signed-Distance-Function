@@ -15,7 +15,7 @@ from vvrpywork import scene, shapes
 
 mesh = shapes.Mesh3D("models/CatMesh.ply")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
-print(f"Triangles: {len(mesh.triangles)}")
+print(f"Triangles: {len(mesh.triangles)}, Vertices: {len(mesh.vertices)}")
 
 
 WIDTH = 1400
@@ -76,9 +76,9 @@ class Window(scene.Scene3D):
         outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting)
         pointsConstructorB.next_animation = outlineConstructorB
 
-        # skip previous tasks
-        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
-        meshConstructor.next_animation = sdf_constructor
+        # # skip previous tasks
+        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
+        # meshConstructor.next_animation = sdf_constructor
 
         clear.next_animation = sdf_constructor
 
