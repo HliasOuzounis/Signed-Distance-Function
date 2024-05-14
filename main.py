@@ -64,17 +64,23 @@ class Window(scene.Scene3D):
         # Task 6: Calculate min distance to mesh
         # Task 7: Create SDF function
         sdf_constructor = SDFConstructor(meshConstructor.mesh, pointsConstructor.kd_tree)
+        
+        clearB = ClearCallback(sdf_constructor)
+        sdf_constructor.next_animation = clearB
+        
         planeConstructorB = PlaneConstructor(meshConstructor.mesh)
         pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True)
+        clearB.next_animation = planeConstructorB
+        planeConstructorB.next_animation = pointsConstructorB
+        
+        outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting)
+        pointsConstructorB.next_animation = outlineConstructorB
 
         # # skip previous tasks
         # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
         # meshConstructor.next_animation = sdf_constructor
 
         clear.next_animation = sdf_constructor
-
-        # inf loop
-        # clear.next_animation = planeConstructor
 
 
 if __name__ == "__main__":

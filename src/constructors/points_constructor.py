@@ -3,12 +3,12 @@ import numpy as np
 from vvrpywork.shapes import Mesh3D, PointSet3D, Cuboid3D
 
 from .callback import Callback, Scene3D, SequenceHandler
-from ..utils import KDTree, TriangleParams2D
+from ..utils import KDTree, TriangleParams2D, SDF
 from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D, useKDTree=False, useRayMarching=False) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, useKDTree=False, useRayMarching=False, *sdf) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -21,9 +21,11 @@ class PointsConstructor(Callback):
         self.intersecting_name = "intersecting points"
         self.non_intersecting = PointSet3D()
         self.non_intersecting_name = "non-intersecting points"
-        
+
         if self.useKDTree:
             self.kd_tree = KDTree()
+        if self.useRayMarching:
+            self.sdf = sdf[0]
 
         self.total_points = 15000
         self.step = 1 / 100
@@ -32,15 +34,15 @@ class PointsConstructor(Callback):
         self.l = 0
         self.prev_index = 0
 
-        plane_normal = np.cross(
+        self.plane_normal = np.cross(
             self.plane.vertices[1] - self.plane.vertices[0],
             self.plane.vertices[2] - self.plane.vertices[0],
         )
-        plane_normal /= np.linalg.norm(plane_normal)
+        self.plane_normal /= np.linalg.norm(self.plane_normal)
 
         self.rot_mat = (
-            utility.rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
-            if plane_normal[2] != 1
+            utility.rotation_matrix_from_vectors(self.plane_normal, np.array([0, 0, 1]))
+            if self.plane_normal[2] != 1
             else np.eye(3)
         )
         inv_rot_mat = np.linalg.inv(self.rot_mat)
@@ -91,8 +93,16 @@ class PointsConstructor(Callback):
 
         # interecting_points = self.triangle_params.check_points(self.random_points[self.prev_index : index + 1])
         if self.useKDTree:
-            interecting_points = self.kd_tree.intersects_mesh(self.random_points[self.prev_index : index + 1]) # ~ 2 times faster
+            interecting_points = self.kd_tree.intersects_mesh(  # ~ 2 times faster
+                self.random_points[self.prev_index : index + 1]
+            )
             interecting_points_indexes = interecting_points > 0
+            
+        if self.useSDF:
+            interecting_points = self.sdf.ray_marching(
+                self.random_points[self.prev_index : index + 1], 
+                -self.plane_normal
+            )
 
         self.non_intersecting_points = np.concatenate([
             self.non_intersecting_points[(self.prev_index - index) * 4:],

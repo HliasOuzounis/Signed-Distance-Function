@@ -2,7 +2,7 @@ import numpy as np
 
 from vvrpywork.shapes import PointSet3D, Mesh3D
 
-from ..utils import KDTree
+from ..utils import KDTree, SDF
 from ..utils import utility
 
 from .callback import Callback, SequenceHandler, Scene3D
@@ -39,6 +39,8 @@ class SDFConstructor(Callback):
         self.grid = (x, y, z)
 
         self.grid_cloud_name = "grid"
+        
+        self.sdf = SDF(self.grid)
 
     def animate_init(self) -> None:
         self.l = 0
@@ -46,6 +48,8 @@ class SDFConstructor(Callback):
 
         self.grid_cloud = PointSet3D(np.zeros((1, 3)), size=0.5)
         self.grid_colors = np.zeros((self.total_points, 3))
+        
+        self.distances = np.zeros((self.total_points, 1))
 
         self.scene.removeShape(self.grid_cloud_name)
         self.scene.addShape(self.grid_cloud, self.grid_cloud_name)
@@ -55,11 +59,18 @@ class SDFConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
+            self.sdf.build(self.distances.reshape((
+                self.grid[0].shape[0], 
+                self.grid[1].shape[0], 
+                self.grid[2].shape[0])
+            ))
             self.stop_animate()
 
         index = int(self.grid_points.shape[0] * self.l)
 
         inside = self.kd_tree.is_inside(self.grid_points[self.prev_index : index + 1])
+        
+        self.distances[self.prev_index : index + 1] = self.calulate_distanes(self.grid_points[self.prev_index : index + 1])
 
         self.grid_colors[self.prev_index : index + 1][inside] = np.array([[0, 0, 1]])
         self.grid_colors[self.prev_index : index + 1][~inside] = np.array([[1, 0, 0]])
@@ -72,3 +83,6 @@ class SDFConstructor(Callback):
         self.prev_index = index
 
         return True
+
+    def calulate_distanes(self, points: np.array) -> np.array:
+        return np.empty(points.shape[0])
