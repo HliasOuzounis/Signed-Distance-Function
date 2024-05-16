@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024/Arch Linux)  (format=lualatex 2024.4.20)  15 MAY 2024 01:42
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024/Arch Linux)  (format=lualatex 2024.4.20)  16 MAY 2024 22:44
  system commands enabled.
 **draft.tex
 (./draft.tex
@@ -898,10 +898,10 @@ h LuaLaTeX)
 (/usr/share/texmf-dist/tex/latex/polyglossia/gloss-greek.ldf
 File: gloss-greek.ldf polyglossia: module for Greek
 Module polyglossia Info: Language data for greek
-(polyglossia)            righthyphenmin	1
 (polyglossia)            hyphenation	
-(polyglossia)            lefthyphenmin	1
+(polyglossia)            righthyphenmin	1
 (polyglossia)            patterns	hyph-el-polyton.pat.txt
+(polyglossia)            lefthyphenmin	1
 (polyglossia)            synonyms	polygreek
 (polyglossia)            loader	loadhyph-el-polyton.tex on input line 21
 Module polyglossia Info: Language greek was not yet loaded; created with id 2 on
@@ -909,10 +909,10 @@ Module polyglossia Info: Language greek was not yet loaded; created with id 2 on
 
 (/usr/share/texmf-dist/tex/latex/polyglossia/xgreek-fixes.def)
 Module polyglossia Info: Language data for monogreek
-(polyglossia)            righthyphenmin	1
 (polyglossia)            hyphenation	
-(polyglossia)            lefthyphenmin	1
+(polyglossia)            righthyphenmin	1
 (polyglossia)            patterns	hyph-el-monoton.pat.txt
+(polyglossia)            lefthyphenmin	1
 (polyglossia)            synonyms	
 (polyglossia)            loader	loadhyph-el-monoton.tex on input line 147
 Module polyglossia Info: Language monogreek was not yet loaded; created with id 
@@ -1371,67 +1371,63 @@ LaTeX Font Warning: Font shape `TU/GFSDidot(2)/b/n' undefined
 (Font)              using `TU/GFSDidot(2)/m/n' instead on input line 7.
 
 
-LaTeX Warning: Citation `concrete-cat-statue' on page 1 undefined on input line
- 14.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 10--16
+Underfull \hbox (badness 10000) in paragraph at lines 11--18
 
  []
 
 
-LaTeX Warning: Citation `rodrigues-rotation-formula' on page 1 undefined on inp
-ut line 30.
+LaTeX Warning: Citation `barycentric-coordinates' on page 1 undefined on input 
+line 26.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 22--33
-
- []
+LaTeX Warning: Reference `barycentric' on page 1 undefined on input line 56.
 
 
-Overfull \hbox (1.14865pt too wide) in paragraph at lines 37--48
-[]\TU/GFSDidot(2)/b/n/10 Για την ομοιό-μορφη δειγ-μα-τ
-ο-λη-ψία του επι-πέ-δου χρη-σι-μο-ποι-ή-θηκε 
-η συ-νάρ-τηση create_random
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 37--48
+Underfull \hbox (badness 10000) in paragraph at lines 49--58
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 37--48
+Underfull \hbox (badness 10000) in paragraph at lines 49--58
 
  []
 
 
 LaTeX Font Warning: Font shape `TU/GFSDidot(2)/m/sl' undefined
-(Font)              using `TU/GFSDidot(2)/m/n' instead on input line 48.
+(Font)              using `TU/GFSDidot(2)/m/n' instead on input line 58.
 
 [1
 
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-<images/projection-point-approximation.png, id=35, 1433.355pt x 932.48375pt>
-File: images/projection-point-approximation.png Graphic file (type png)
-<use images/projection-point-approximation.png>
-Package luatex.def Info: images/projection-point-approximation.png  used on inp
-ut line 49.
-(luatex.def)             Requested size: 307.42169pt x 200.0pt.
- [2<./images/projection-point-approximation.png>]
-LaTeX Info: Redefining \rmfamily on input line 56.
-LaTeX Info: Redefining \sffamily on input line 56.
-LaTeX Info: Redefining \ttfamily on input line 56.
+Underfull \hbox (badness 10000) in paragraph at lines 63--87
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--87
+
+ []
+
+[2]
+LaTeX Info: Redefining \rmfamily on input line 93.
+LaTeX Info: Redefining \sffamily on input line 93.
+LaTeX Info: Redefining \ttfamily on input line 93.
  (./draft.bbl
 
 LaTeX Font Warning: Font shape `TU/GFSDidot(0)/b/n' undefined
 (Font)              using `TU/GFSDidot(0)/m/n' instead on input line 1.
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 4--10
+\TU/mononoki(0)/m/n/10 //users.csc.calpoly.edu/~zwood/teaching/csc471/2017F/bary
+centric.pdf$[]\TU/GFSDidot(0)/m/n/10 ,
+ []
+
 )
 
 LaTeX Font Warning: Font shape `TU/GFSDidot(0)/m/sl' undefined
-(Font)              using `TU/GFSDidot(0)/m/n' instead on input line 60.
+(Font)              using `TU/GFSDidot(0)/m/n' instead on input line 97.
 
 [3
 
@@ -1451,34 +1447,29 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-
-Package rerunfilecheck Warning: File `draft.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `draft.out':
-(rerunfilecheck)             Before: EAD15B6F68E3687FCCC9D2A42539D200;1007
-(rerunfilecheck)             After:  EAC9826C8265E33E25A3CA21F2A3CA47;1324.
+Package rerunfilecheck Info: File `draft.out' has not changed.
+(rerunfilecheck)             Checksum: 4CB2DBAE287F63C10043DB7D38FC8CE8;827.
 )
 
 Here is how much of LuaTeX's memory you used:
- 35697 strings out of 476447
+ 35689 strings out of 476447
  125126,1977958 words of node,token memory allocated
- 556 words of node memory still in use:
-   6 hlist, 2 vlist, 2 rule, 2 glue, 4 kern, 1 glyph, 8 attribute, 63 glue_spec,
- 8 attribute_list, 2 write, 1 pdf_action nodes
-   avail lists: 1:1,2:510,3:256,4:56,5:371,6:101,7:9953,8:43,9:674,10:12,11:954
- 56988 multiletter control sequences out of 65536+600000
- 75 fonts using 20735327 bytes
+ 569 words of node memory still in use:
+   7 hlist, 2 vlist, 2 rule, 2 glue, 4 kern, 1 glyph, 9 attribute, 63 glue_spec,
+ 9 attribute_list, 2 write, 1 pdf_action nodes
+   avail lists: 1:1,2:730,3:284,4:51,5:367,6:101,7:8605,8:74,9:1152,10:15,11:696
+
+ 56983 multiletter control sequences out of 65536+600000
+ 77 fonts using 21443383 bytes
  130i,19n,119p,541b,601s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/fonts/ttf-mononoki/mononoki-Regular.ttf></usr/share/texmf-dist/fonts
 /opentype/public/lm-math/latinmodern-math.otf></usr/share/texmf-dist/fonts/opent
 ype/public/lm-math/latinmodern-math.otf></usr/local/share/fonts/GFSDidot-Regular
 .ttf>
-Output written on draft.pdf (3 pages, 581353 bytes).
+Output written on draft.pdf (3 pages, 37442 bytes).
 
-PDF statistics: 86 PDF objects out of 1000 (max. 8388607)
- 63 compressed objects within 1 object stream
+PDF statistics: 81 PDF objects out of 1000 (max. 8388607)
+ 60 compressed objects within 1 object stream
  14 named destinations out of 1000 (max. 131072)
- 56 words of extra memory for PDF output out of 10000 (max. 100000000)
+ 48 words of extra memory for PDF output out of 10000 (max. 100000000)
 

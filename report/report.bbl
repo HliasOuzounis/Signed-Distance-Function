@@ -1,0 +1,21 @@
+\begin{thebibliography}{1}
+
+\bibitem{concrete-cat-statue}
+Riley~Queen (all) and Rico~Cilliers (guidance).
+\newblock Concrete cat statue.
+\newblock \url{https://polyhaven.com/a/concrete_cat_statue}.
+
+\bibitem{rodrigues-rotation-formula}
+Wikipedia.
+\newblock Rodrigues' rotation formula.
+\newblock \url{https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula}.
+
+\bibitem{barycentric-coordinates}
+Philippe~B. Laval.
+\newblock Mathematics for computer graphics - barycentric coordinates.
+\newblock
+  \url{https://users.csc.calpoly.edu/~zwood/teaching/csc471/2017F/barycentric.pdf},
+  November 2003.
+\newblock Section 1.1.
+
+\end{thebibliography}
