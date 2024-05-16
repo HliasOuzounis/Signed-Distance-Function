@@ -30,12 +30,19 @@
 
 \usepackage{float} % Added for hard placement of images.
 \usepackage{subfig}
+\usepackage{caption}
 
 \usepackage[dvipsnames]{xcolor} % Added for extra colors.
 
 \usepackage{tikz} % For colored boxes and more.
 
 \usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor={black!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+} % prettier links
 \usepackage{url} % For URLs
 
 \numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
@@ -60,7 +67,7 @@
 	headheight=0.75cm, % Header height
 	footskip=1.5cm, % Space from the bottom margin to the baseline of the footer
 	headsep=0.75cm, % Space from the top margin to the baseline of the header
-	%showframe, % Uncomment to show how the type block is set on the page
+	% showframe, % Uncomment to show how the type block is set on the page
 }
 
 %----------------------------------------------------------------------------------------
@@ -129,6 +136,7 @@
 %	CUSTOM COMMANDS
 %----------------------------------------------------------------------------------------
 
+% Define a command for inserting images [caption]{image}{size}
 \newcommand{\img}[3][htbp]{%
     \begin{figure}[H]
         \centering
@@ -140,17 +148,19 @@
     \end{figure}
 }
 
-% Two images side by side
+% Two images side by side {image1}{caption1}{image2}{caption2
 \newcommand{\twoimgs}[4]{%
     \begin{figure}[H]
         \centering
-        \begin{minipage}[b]{0.4\textwidth}
-            \fcolorbox{black}{white}{\includegraphics[width=\textwidth]{#1}}
+        \begin{minipage}[b]{0.45\textwidth}
+            \centering
+            \fcolorbox{black}{white}{\includegraphics[width=0.95\textwidth]{#1}}
             \caption{#2}
         \end{minipage}
         \hfill
-        \begin{minipage}[b]{0.4\textwidth}
-            \fcolorbox{black}{white}{\includegraphics[width=\textwidth]{#3}}
+        \begin{minipage}[b]{0.45\textwidth}
+          \centering
+            \fcolorbox{black}{white}{\includegraphics[width=0.95\textwidth]{#3}}
             \caption{#4}
         \end{minipage}
     \end{figure}

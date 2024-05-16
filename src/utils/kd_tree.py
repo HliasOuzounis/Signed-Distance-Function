@@ -38,6 +38,32 @@ class TrianglesNode():
     def is_on_right(self, points: np.array):
         points = points[:, :2]
         return np.dot(points, self.line[:2]) > self.line[2]
+    
+    def draw(self, scene, iterations, z, bounds_x=(-0.5, 0.5), bounds_y=(-0.5, 1.0)):
+        import vvrpywork.shapes as shapes
+        if iterations == 0:
+            return
+
+        if self.right is not None:
+            if self.line[0]:
+                self.right.draw(scene, iterations - 1, z, bounds_x=(self.line[2], bounds_x[1]), bounds_y=bounds_y)
+            else:
+                self.right.draw(scene, iterations - 1, z, bounds_x=bounds_x, bounds_y=(self.line[2], bounds_y[1]))
+        
+        if self.left is not None:
+            if self.line[0]:
+                self.left.draw(scene, iterations - 1, z, bounds_x=(bounds_x[0], self.line[2]), bounds_y=bounds_y)
+            else:
+                self.left.draw(scene, iterations - 1, z, bounds_x=bounds_x, bounds_y=(bounds_y[0], self.line[2]))
+            
+        if self.line[0]:
+            line = shapes.Line3D((self.line[2], bounds_y[0], z), (self.line[2], bounds_y[1], z))
+        else:
+            line = shapes.Line3D((bounds_x[0], self.line[2], z), (bounds_x[1], self.line[2], z))
+            
+        scene.addShape(line)
+        
+        self.intersecting_triangles.draw(scene, z)
 
 
 class KDTree:
@@ -94,3 +120,6 @@ class KDTree:
         points = np.dot(points, self.inv_rot_mat)
         intersections = self.troot.check_intersection(points, count_intersections=True)
         return intersections % 2 == 1
+    
+    def draw(self, scene, iterations, z):
+        self.troot.draw(scene, iterations, z)

@@ -4,7 +4,6 @@ import numpy as np
 class TriangleParams2D:
     def __init__(self, triangles, points) -> None:
         # project onto plane
-        self.triangles_d = np.max(points[:, 2][triangles], axis=1)
         triangles = points[triangles]
 
         self.v0, self.v1, self.v2 = (
@@ -40,6 +39,19 @@ class TriangleParams2D:
 
         inside = (u >= 0) & (v >= 0) & (w >= 0) & valid
         return np.sum(inside, axis=1)
+    
+    def draw(self, scene, z):
+        import vvrpywork.shapes as shapes
+        mesh = shapes.Mesh3D(color=(1, 0, 0, 0.8))
+        for v1, v2, v3 in zip(self.v0, self.v1, self.v2):
+            v1[2] = z + 0.01
+            v2[2] = z + 0.01
+            v3[2] = z + 0.01
+            
+            mesh.vertices = np.concatenate((mesh.vertices, [v1, v2, v3]))
+            index = len(mesh.vertices) - 3
+            mesh.triangles = np.concatenate((mesh.triangles, [[index, index + 1, index + 2]]))
+        scene.addShape(mesh)
 
 
 class TriangleParams3D:

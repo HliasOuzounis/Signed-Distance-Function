@@ -56,6 +56,9 @@ class PointsConstructor(Callback):
         if self.useKDTree:
             self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
+        # To visualize the kd tree (keep plane not rotated)
+        self.kd_tree.draw(self.scene, 10, self.plane.vertices[0][2])
+        
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
 
@@ -83,6 +86,7 @@ class PointsConstructor(Callback):
 
     @utility.show_fps
     def animate(self) -> bool:
+        return self.stop_animate()
         self.l += self.step
 
         if self.l > self.limit:
