@@ -44,9 +44,10 @@ class PointsConstructor(Callback):
 
         self.rot_mat = (
             utility.rotation_matrix_from_vectors(self.plane_normal, np.array([0, 0, 1]))
-            if self.plane_normal[2] != 1
+            if not np.isclose(self.plane_normal[2], 1)
             else np.eye(3)
         )
+        
         inv_rot_mat = self.rot_mat.T
         rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
@@ -57,7 +58,7 @@ class PointsConstructor(Callback):
             self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
         # To visualize the kd tree (keep plane not rotated)
-        self.kd_tree.draw(self.scene, 10, self.plane.vertices[0][2])
+        # self.kd_tree.draw(self.scene, 10, self.plane.vertices[0][2])
         
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
@@ -86,7 +87,7 @@ class PointsConstructor(Callback):
 
     @utility.show_fps
     def animate(self) -> bool:
-        return self.stop_animate()
+        # return self.stop_animate()
         self.l += self.step
 
         if self.l > self.limit:

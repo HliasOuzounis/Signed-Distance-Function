@@ -29,8 +29,8 @@ class Window(scene.Scene3D):
         self.mesh = mesh
         self.sequenceHandler = SequenceHandler(self.window, self)
         self.window.set_on_key(self.sequenceHandler.perform_action)
-        self.scene_widget.look_at(np.array([0, 0, -1]), np.array([-1, 0.6, 0.7]), np.array([0, 1, 0]))
-        # self.scene_widget.look_at(np.zeros(3), np.array([-1, 0.5, 1]), np.array([0, 1, 0]))
+        # self.scene_widget.look_at(np.array([0, 0, -1]), np.array([-1, 0.6, 0.7]), np.array([0, 1, 0]))
+        self.scene_widget.look_at(np.zeros(3), np.array([-1, 0.5, 1]), np.array([0, 1, 0]))
         self.init_window()
 
         self.mainLoop()
@@ -54,7 +54,7 @@ class Window(scene.Scene3D):
         planeConstructor.next_animation = pointsConstructor
 
         # Task 3: Calculate outline of the projected points & Task 4: Calculate area of projection
-        outlineConstructor = OutlineConstructor(pointsConstructor.intersecting)
+        outlineConstructor = OutlineConstructor(pointsConstructor.intersecting, planeConstructor.plane)
         pointsConstructor.next_animation = outlineConstructor
 
         # Clear the scene for part B
@@ -74,12 +74,12 @@ class Window(scene.Scene3D):
         clearB.next_animation = planeConstructorB
         planeConstructorB.next_animation = pointsConstructorB
         
-        outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting)
+        outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting, planeConstructorB.plane)
         pointsConstructorB.next_animation = outlineConstructorB
 
-        # # skip previous tasks
-        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
-        # meshConstructor.next_animation = sdf_constructor
+        # skip to part B
+        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
+        meshConstructor.next_animation = sdf_constructor
 
         clear.next_animation = sdf_constructor
 
