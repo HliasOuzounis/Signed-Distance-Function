@@ -2,7 +2,6 @@ import numpy as np
 
 from .triangle_params import TriangleParams2D
 
-
 class TrianglesNode():
     def __init__(self, points, value: np.array, line: np.array, intersecting_triangles: np.array) -> None:
         self.value = value
@@ -10,16 +9,21 @@ class TrianglesNode():
 
         self.left = None
         self.right = None
-
-        self.intersecting_triangles = TriangleParams2D(intersecting_triangles, points)
+        
+        self.empty = intersecting_triangles.shape[0] == 0
+        if not self.empty:
+            self.intersecting_triangles = TriangleParams2D(intersecting_triangles, points)
 
     def check_intersection(self, points: np.array, count_intersections=False):
         if points.shape[0] == 0:
             return np.zeros(0)
 
-        intersects = self.intersecting_triangles.check_points(points, count_intersections)
-        if not count_intersections:
-            intersects = intersects > 0
+        if not self.empty:
+            intersects = self.intersecting_triangles.check_points(points, count_intersections)
+            if not count_intersections:
+                intersects = intersects > 0
+        else:
+            intersects = np.zeros(points.shape[0], dtype=bool)
 
         on_right = self.is_on_right(points)
         
@@ -39,32 +43,45 @@ class TrianglesNode():
         points = points[:, :2]
         return np.dot(points, self.line[:2]) > self.line[2]
     
-    def draw(self, scene, iterations, z, bounds_x=(-0.5, 0.5), bounds_y=(-0.5, 1.0)):
+    def draw(self, scene, iterations, z, inv_rot_mat, bounds_x=(-0.5, 0.5), bounds_y=(-0.5, 1.0)):
         import vvrpywork.shapes as shapes
         if iterations == 0:
+            if self.line[0]:
+                start = np.dot(inv_rot_mat, np.array([self.line[2], bounds_y[0], z]))
+                end = np.dot(inv_rot_mat, np.array([self.line[2], bounds_y[1], z]))
+            else:
+                start = np.dot(inv_rot_mat, np.array([bounds_x[0], self.line[2], z]))
+                end = np.dot(inv_rot_mat, np.array([bounds_x[1], self.line[2], z]))
+                
+            line = shapes.Line3D(start, end)
+            self.line_name = "".join([str(x) for x in start] + [str(x) for x in end])
+            scene.addShape(line, self.line_name)
+            
+            if not self.empty:
+                self.intersecting_triangles.draw(scene, z, inv_rot_mat)
             return
 
         if self.right is not None:
             if self.line[0]:
-                self.right.draw(scene, iterations - 1, z, bounds_x=(self.line[2], bounds_x[1]), bounds_y=bounds_y)
+                self.right.draw(scene, iterations - 1, z, inv_rot_mat, bounds_x=(self.line[2], bounds_x[1]), bounds_y=bounds_y)
             else:
-                self.right.draw(scene, iterations - 1, z, bounds_x=bounds_x, bounds_y=(self.line[2], bounds_y[1]))
+                self.right.draw(scene, iterations - 1, z, inv_rot_mat, bounds_x=bounds_x, bounds_y=(self.line[2], bounds_y[1]))
         
         if self.left is not None:
             if self.line[0]:
-                self.left.draw(scene, iterations - 1, z, bounds_x=(bounds_x[0], self.line[2]), bounds_y=bounds_y)
+                self.left.draw(scene, iterations - 1, z, inv_rot_mat, bounds_x=(bounds_x[0], self.line[2]), bounds_y=bounds_y)
             else:
-                self.left.draw(scene, iterations - 1, z, bounds_x=bounds_x, bounds_y=(bounds_y[0], self.line[2]))
-            
-        if self.line[0]:
-            line = shapes.Line3D((self.line[2], bounds_y[0], z), (self.line[2], bounds_y[1], z))
-        else:
-            line = shapes.Line3D((bounds_x[0], self.line[2], z), (bounds_x[1], self.line[2], z))
-            
-        scene.addShape(line)
-        
-        self.intersecting_triangles.draw(scene, z)
+                self.left.draw(scene, iterations - 1, z, inv_rot_mat, bounds_x=bounds_x, bounds_y=(bounds_y[0], self.line[2]))
 
+    def clear(self, scene):
+        scene.removeShape(self.line_name)
+        
+        if self.right is not None:
+            self.right.clear(scene)
+        if self.left is not None:
+            self.left.clear(scene)
+        if not self.empty:
+            self.intersecting_triangles.clear(scene)
 
 class KDTree:
     def __init__(self) -> None:
@@ -122,4 +139,7 @@ class KDTree:
         return intersections % 2 == 1
     
     def draw(self, scene, iterations, z):
-        self.troot.draw(scene, iterations, z)
+        self.troot.draw(scene, iterations, z, self.inv_rot_mat)
+        
+    def clear(self, scene):
+        self.troot.clear(scene)

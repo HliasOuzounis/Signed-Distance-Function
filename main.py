@@ -5,6 +5,7 @@ from src.sequence_handler import SequenceHandler
 from src.constructors import (
     MeshConstructor,
     PlaneConstructor,
+    KDTreeConstructor,
     PointsConstructor,
     OutlineConstructor,
     ClearCallback,
@@ -48,10 +49,14 @@ class Window(scene.Scene3D):
 
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, useKDTree=True)
+        kdTreeConstructor = KDTreeConstructor(meshConstructor.mesh, planeConstructor.plane)
+        clearKdTree = ClearCallback(kdTreeConstructor)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, useKDTree=True, kdTree=kdTreeConstructor.kd_tree)
 
         meshConstructor.next_animation = planeConstructor
-        planeConstructor.next_animation = pointsConstructor
+        planeConstructor.next_animation = kdTreeConstructor
+        kdTreeConstructor.next_animation = clearKdTree
+        clearKdTree.next_animation = pointsConstructor
 
         # Task 3: Calculate outline of the projected points & Task 4: Calculate area of projection
         outlineConstructor = OutlineConstructor(pointsConstructor.intersecting, planeConstructor.plane)
@@ -78,8 +83,11 @@ class Window(scene.Scene3D):
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, np.eye(3))
-        meshConstructor.next_animation = sdf_constructor
+        # from src.utils import utility
+        # inv_rot_mat = utility.rotation_matrix_from_vectors(np.array([0.6, 0, 0.8]), np.array([0, 0, 1])).T
+        # inv_rot_mat = np.eye(3)
+        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, inv_rot_mat)
+        # meshConstructor.next_animation = sdf_constructor
 
         clear.next_animation = sdf_constructor
 

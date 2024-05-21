@@ -8,7 +8,7 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D, *, useKDTree=False, useRayMarching=False, sdf: SDF|None=None) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, *, useKDTree=False, kdTree: KDTree|None=None, useRayMarching=False, sdf: SDF|None=None) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -23,9 +23,12 @@ class PointsConstructor(Callback):
         self.non_intersecting_name = "non-intersecting points"
 
         if self.useKDTree:
-            self.kd_tree = KDTree()
+            if not isinstance(kdTree, KDTree):
+                raise ValueError("KDTree is required for KDTree")
+            self.kd_tree = kdTree
+            
         if self.useRayMarching:
-            if sdf is None:
+            if not isinstance(sdf, SDF):
                 raise ValueError("SDF function is required for ray marching")
             self.sdf = sdf
 
@@ -36,15 +39,15 @@ class PointsConstructor(Callback):
         self.l = 0
         self.prev_index = 0
 
-        self.plane_normal = np.cross(
+        plane_normal = np.cross(
             self.plane.vertices[1] - self.plane.vertices[0],
             self.plane.vertices[2] - self.plane.vertices[0],
         )
-        self.plane_normal /= np.linalg.norm(self.plane_normal)
+        plane_normal /= np.linalg.norm(plane_normal)
 
         self.rot_mat = (
-            utility.rotation_matrix_from_vectors(self.plane_normal, np.array([0, 0, 1]))
-            if not np.isclose(self.plane_normal[2], 1)
+            utility.rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
+            if not np.isclose(plane_normal[2], 1)
             else np.eye(3)
         )
         
@@ -57,8 +60,8 @@ class PointsConstructor(Callback):
         if self.useKDTree:
             self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
-        # To visualize the kd tree (keep plane not rotated)
-        # self.kd_tree.draw(self.scene, 10, self.plane.vertices[0][2])
+        # # To visualize the kd tree (keep plane not rotated)
+        # self.kd_tree.draw(self.scene, 3, rotated_plane_verts[0][2])
         
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))

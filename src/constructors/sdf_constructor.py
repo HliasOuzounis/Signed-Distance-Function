@@ -14,7 +14,7 @@ class SDFConstructor(Callback):
         self.mesh = mesh
         self.kd_tree = kd_tree
 
-        self.total_points = 25_000
+        self.total_points = 10 ** 3
         point_per_axis = int(self.total_points ** (1 / 3))
         self.total_points = point_per_axis ** 3
         self.step = 1 / 500
@@ -54,8 +54,9 @@ class SDFConstructor(Callback):
         self.scene.removeShape(self.grid_cloud_name)
         self.scene.addShape(self.grid_cloud, self.grid_cloud_name)
 
+
     @utility.show_fps
-    def animate(self) -> bool:
+    def animate(self) -> bool:    
         self.l += self.step
 
         if self.l > self.limit:
