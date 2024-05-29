@@ -8,7 +8,7 @@ from ..utils import utility
 
 
 class KDTreeConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D) -> None:
+    def __init__(self, mesh: Mesh3D, plane: Mesh3D, draw=True) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -17,6 +17,8 @@ class KDTreeConstructor(Callback):
         self.kd_tree = KDTree()
         self.iter = 0
         self.total_iters = 15
+        
+        self.draw = draw
 
     def animate_init(self) -> None:
         self.clear(self.sequence, self.scene)
@@ -38,10 +40,11 @@ class KDTreeConstructor(Callback):
         inv_rot_mat = rot_mat.T
         self.rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
+        print("Building KD Tree")
         self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
-    def animate(self) -> bool:        
-        if self.iter == self.total_iters:
+    def animate(self) -> bool:
+        if self.iter == self.total_iters or not self.draw:
             self.stop_animate()
             return False
 

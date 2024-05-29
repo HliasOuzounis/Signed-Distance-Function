@@ -9,15 +9,14 @@ from .callback import Callback, SequenceHandler, Scene3D
 
 
 class SDFConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, kd_tree: KDTree) -> None:
+    def __init__(self, mesh: Mesh3D) -> None:
         super().__init__()
         self.mesh = mesh
-        self.kd_tree = kd_tree
 
-        self.total_points = 10 ** 3
-        point_per_axis = int(self.total_points ** (1 / 3))
+        self.total_points = 30 ** 3
+        point_per_axis = int(self.total_points ** (1 / 3)) + 1
         self.total_points = point_per_axis ** 3
-        self.step = 1 / 500
+        self.step = 1 / 100
 
         offset = 0.01
 
@@ -38,22 +37,20 @@ class SDFConstructor(Callback):
 
         self.grid = (x, y, z)
 
-        self.grid_cloud_name = "grid"
+        self.grid_clouds = {}
         
         self.sdf = SDF(self.grid)
+        
+        self.kd_tree = KDTree()
+        self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, np.eye(3))
 
     def animate_init(self) -> None:
+        self.clear(self.sequence, self.scene)
+        
         self.l = 0
         self.prev_index = 0
-
-        self.grid_cloud = PointSet3D(np.zeros((1, 3)), size=0.5)
-        self.grid_colors = np.zeros((self.total_points, 3))
         
         self.distances = np.zeros((self.total_points, 1))
-
-        self.scene.removeShape(self.grid_cloud_name)
-        self.scene.addShape(self.grid_cloud, self.grid_cloud_name)
-
 
     @utility.show_fps
     def animate(self) -> bool:    
@@ -71,19 +68,40 @@ class SDFConstructor(Callback):
 
         inside = self.kd_tree.is_inside(self.grid_points[self.prev_index : index + 1])
         
-        self.distances[self.prev_index : index + 1] = self.calulate_distanes(self.grid_points[self.prev_index : index + 1])
+        # self.distances[self.prev_index : index + 1] = self.calulate_distanes(self.grid_points[self.prev_index : index + 1])
+        # self.distances[inside] *= -1
 
-        self.grid_colors[self.prev_index : index + 1][inside] = np.array([[0, 0, 1]])
-        self.grid_colors[self.prev_index : index + 1][~inside] = np.array([[1, 0, 0]])
+        grid_colors = np.zeros((inside.shape[0], 3))
+        grid_colors[inside] = np.array([[0, 0, 1]])
+        grid_colors[~inside] = np.array([[1, 0, 0]])
 
-        self.grid_cloud.points = self.grid_points[: index + 1]
-        self.grid_cloud.colors = self.grid_colors[: index + 1]
+        grid_cloud = PointSet3D(self.grid_points[self.prev_index : index + 1], size=0.5)
+        grid_cloud.colors = grid_colors
+        name = f"grid_cloud_{self.prev_index}_{index}"
+        self.grid_clouds[name] = grid_cloud
 
-        self.scene.updateShape(self.grid_cloud_name)
-
+        self.scene.addShape(grid_cloud, name)
         self.prev_index = index
 
         return True
 
     def calulate_distanes(self, points: np.array) -> np.array:
-        return np.empty((points.shape[0], 1))
+        mesh_vertices = self.mesh.vertices
+        
+        points = points[:, np.newaxis, :]
+        point_to_vertices_distances = np.linalg.norm(points - mesh_vertices, axis=2)
+
+        distances = np.inf * np.ones((points.shape[0], 1))
+        for triangle in self.mesh.triangles:
+            improvement = distances > point_to_vertices_distances[:, triangle].min(axis=1)
+            distances[improvement] = utility.distance_to_triangle(mesh_vertices[triangle], points[improvement])
+
+        return distances
+    
+    def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
+        for key in self.grid_clouds:
+            scene.removeShape(key)
+
+        self.grid_clouds = {}
+
+        return True

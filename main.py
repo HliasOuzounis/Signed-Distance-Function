@@ -45,6 +45,8 @@ class Window(scene.Scene3D):
         )
         # Task 1: Create the mesh
         meshConstructor = MeshConstructor(self.mesh)
+        
+        from vvrpywork.shapes import LineSet3D
         self.sequenceHandler.next_animation = meshConstructor
 
         # Task 2: Create a plane and uniformly select perpendicualr lines. Calculate if the lines intersect the mesh
@@ -63,33 +65,29 @@ class Window(scene.Scene3D):
         pointsConstructor.next_animation = outlineConstructor
 
         # Clear the scene for part B
-        clear = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
-        outlineConstructor.next_animation = clear
+        clear_partA = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
+        outlineConstructor.next_animation = clear_partA
 
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
         # Task 7: Create SDF function
-        sdf_constructor = SDFConstructor(meshConstructor.mesh, pointsConstructor.kd_tree)
+        sdf_constructor = SDFConstructor(meshConstructor.mesh)
+        clear_partA.next_animation = sdf_constructor
         
-        clearB = ClearCallback(sdf_constructor)
-        sdf_constructor.next_animation = clearB
-        
+        clear_sdf_grid = ClearCallback(sdf_constructor)
+        sdf_constructor.next_animation = clear_sdf_grid
         planeConstructorB = PlaneConstructor(meshConstructor.mesh)
-        pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True, sdf=sdf_constructor.sdf)
-        clearB.next_animation = planeConstructorB
-        planeConstructorB.next_animation = pointsConstructorB
+        clear_sdf_grid.next_animation = planeConstructorB
         
+        pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True, sdf=sdf_constructor.sdf)
+        clear_sdf_grid.next_animation = pointsConstructorB
+
+        # Task 8 & 9: Calculate outline of the projected points & Calculate area of projection 
         outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting, planeConstructorB.plane)
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        # from src.utils import utility
-        # inv_rot_mat = utility.rotation_matrix_from_vectors(np.array([0.6, 0, 0.8]), np.array([0, 0, 1])).T
-        # inv_rot_mat = np.eye(3)
-        # pointsConstructor.kd_tree.build_tree(meshConstructor.mesh.vertices, meshConstructor.mesh.triangles, inv_rot_mat)
-        # meshConstructor.next_animation = sdf_constructor
-
-        clear.next_animation = sdf_constructor
+        meshConstructor.next_animation = sdf_constructor
 
 
 if __name__ == "__main__":

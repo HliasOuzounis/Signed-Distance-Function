@@ -1,6 +1,6 @@
 import numpy as np
 
-from vvrpywork.shapes import Mesh3D
+from vvrpywork.shapes import Mesh3D, LineSet3D
 
 from .callback import Callback, Scene3D, SequenceHandler
 from ..utils import utility
@@ -38,6 +38,9 @@ class MeshConstructor(Callback):
 
     def animate(self) -> bool:
         if self.l > self.limit:
+
+            wireframe = LineSet3D.create_from_mesh(self.mesh)
+            self.scene.addShape(wireframe, "wireframe")
             self.stop_animate()
 
         index = int(self.l * self.total)

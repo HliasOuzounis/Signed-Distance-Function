@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class TriangleParams2D:
     def __init__(self, triangles, points) -> None:
         # project onto plane
