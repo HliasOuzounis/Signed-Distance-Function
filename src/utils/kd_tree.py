@@ -10,6 +10,8 @@ class TrianglesNode():
         self.left = None
         self.right = None
         
+        self.line_name = None
+        
         self.empty = intersecting_triangles.shape[0] == 0
         if not self.empty:
             self.intersecting_triangles = TriangleParams2D(intersecting_triangles, points)
@@ -74,7 +76,8 @@ class TrianglesNode():
                 self.left.draw(scene, iterations - 1, z, inv_rot_mat, bounds_x=bounds_x, bounds_y=(bounds_y[0], self.line[2]))
 
     def clear(self, scene):
-        scene.removeShape(self.line_name)
+        if self.line_name is not None:
+            scene.removeShape(self.line_name)
         
         if self.right is not None:
             self.right.clear(scene)

@@ -95,13 +95,9 @@ def rotation_matrix_from_vectors(vec1: np.array, vec2: np.array) -> np.array:
     return rotation_matrix
 
 
-def distance_to_triangle(triangle: np.array, points: np.array) -> np.array:
-    distances = np.zeros((points.shape[0], 1))
+def distance_to_triangle(triangle: np.array, point: np.array) -> float:
+    a, b, c = triangle
     
-    points = points[:, np.newaxis, :] - triangle[0]
-
-    edge1 = triangle[1] - triangle[0]
-    edge2 = triangle[2] - triangle[0]
 
     
     

@@ -21,7 +21,7 @@ class SequenceHandler:
             self.curr_animation(self, self.scene)
 
         if key == o3d.visualization.gui.KeyName.U:
-            print("Not implemented yet")
+            raise NotImplementedError("Undo not implemented yet")
 
     @property
     def next_animation(self):

@@ -19,6 +19,8 @@ class TriangleParams2D:
         self.dot11 = np.einsum("ij,ij->i", self.edge2, self.edge2)
 
         self.inv_denom = 1 / (self.dot00 * self.dot11 - self.dot01 * self.dot01)
+        
+        self.mesh_name = None
 
     def check_points(self, points, count_intersections=False):        
         if points.shape[0] == 0:
@@ -62,7 +64,8 @@ class TriangleParams2D:
         scene.addShape(mesh, self.mesh_name)
 
     def clear(self, scene):
-        scene.removeShape(self.mesh_name)
+        if self.mesh_name is not None:
+            scene.removeShape(self.mesh_name)
 
 def _test(): ...
 

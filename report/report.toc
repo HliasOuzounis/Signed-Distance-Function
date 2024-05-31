@@ -1,9 +1,10 @@
 \selectlanguage *[]{greek}
-\contentsline {chapter}{\numberline {1}Part A}{2}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Loading a Watertight Mesh}{2}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Porjection of model onto a plane}{2}{section.1.2}%
-\contentsline {subsection}{\numberline {1.2.1}Δημιουργία του επιπέδου}{2}{subsection.1.2.1}%
-\contentsline {subsection}{\numberline {1.2.2}Δειγματοληψία του επιπέδου}{3}{subsection.1.2.2}%
-\contentsline {subsection}{\numberline {1.2.3}Υπολογισμός της προβολής}{4}{subsection.1.2.3}%
-\contentsline {subsection}{\numberline {1.2.4}Επιτάχυνση των υπολογισμών}{4}{subsection.1.2.4}%
+\contentsline {chapter}{\numberline {1}Εισαγωγή}{2}{chapter.1}%
+\contentsline {chapter}{\numberline {2}Part A}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Loading a Watertight Mesh}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Porjection of model onto a plane}{3}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Δημιουργία του επιπέδου}{3}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Δειγματοληψία του επιπέδου}{4}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Υπολογισμός της προβολής}{5}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Επιτάχυνση των υπολογισμών}{6}{subsection.2.2.4}%
 \selectlanguage *[]{english}

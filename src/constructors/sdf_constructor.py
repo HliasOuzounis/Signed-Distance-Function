@@ -93,8 +93,7 @@ class SDFConstructor(Callback):
 
         distances = np.inf * np.ones((points.shape[0], 1))
         for triangle in self.mesh.triangles:
-            improvement = distances > point_to_vertices_distances[:, triangle].min(axis=1)
-            distances[improvement] = utility.distance_to_triangle(mesh_vertices[triangle], points[improvement])
+            distances = utility.distance_to_triangle(mesh_vertices[triangle], points)
 
         return distances
     

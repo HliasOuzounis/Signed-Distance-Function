@@ -55,7 +55,7 @@ class Callback(ABC):
         """
         Clear the current animation
         """
-        raise NotImplementedError("Clear not implemented")
+        return False
 
     @abstractmethod
     def animate(self) -> bool:
