@@ -1,9 +1,9 @@
 **/*.pyc
 **/__pycache__
-report/*.bbl
-report/*.blg
-report/*.log
-report/*.out
-report/*.toc
-report/_minted-*
+./report/*.bbl
+./report/*.blg
+./report/*.log
+./report/*.out
+./report/*.toc
+./report/build
 ΥΠΟΛΟΓΙΣΤΙΚΗ ΓΕΩΜΕΤΡΙΑ & ΟΡΑΣΗ.pdf

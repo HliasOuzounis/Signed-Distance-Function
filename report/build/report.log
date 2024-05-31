@@ -1,4 +1,4 @@
-This is LuaHBTeX, Version 1.18.0 (TeX Live 2024/Arch Linux)  (format=lualatex 2024.5.20)  29 MAY 2024 17:02
+This is LuaHBTeX, Version 1.18.0 (TeX Live 2024/Arch Linux)  (format=lualatex 2024.5.20)  31 MAY 2024 20:21
  system commands enabled.
 **report.tex
 (./report.tex
@@ -900,23 +900,23 @@ h LuaLaTeX)
 (/usr/share/texmf-dist/tex/latex/polyglossia/gloss-greek.ldf
 File: gloss-greek.ldf polyglossia: module for Greek
 Module polyglossia Info: Language data for greek
-(polyglossia)            hyphenation	
-(polyglossia)            loader	loadhyph-el-polyton.tex
-(polyglossia)            patterns	hyph-el-polyton.pat.txt
 (polyglossia)            righthyphenmin	1
-(polyglossia)            synonyms	polygreek
-(polyglossia)            lefthyphenmin	1 on input line 21
+(polyglossia)            loader	loadhyph-el-polyton.tex
+(polyglossia)            hyphenation	
+(polyglossia)            patterns	hyph-el-polyton.pat.txt
+(polyglossia)            lefthyphenmin	1
+(polyglossia)            synonyms	polygreek on input line 21
 Module polyglossia Info: Language greek was not yet loaded; created with id 2 on
  input line 21
 
 (/usr/share/texmf-dist/tex/latex/polyglossia/xgreek-fixes.def)
 Module polyglossia Info: Language data for monogreek
-(polyglossia)            hyphenation	
-(polyglossia)            loader	loadhyph-el-monoton.tex
-(polyglossia)            patterns	hyph-el-monoton.pat.txt
 (polyglossia)            righthyphenmin	1
-(polyglossia)            synonyms	
-(polyglossia)            lefthyphenmin	1 on input line 147
+(polyglossia)            loader	loadhyph-el-monoton.tex
+(polyglossia)            hyphenation	
+(polyglossia)            patterns	hyph-el-monoton.pat.txt
+(polyglossia)            lefthyphenmin	1
+(polyglossia)            synonyms	 on input line 147
 Module polyglossia Info: Language monogreek was not yet loaded; created with id 
 3 on input line 147
 Package polyglossia Info: Option: Greek, variant=monotonic.
