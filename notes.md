@@ -23,13 +23,13 @@
 
 ### ~~Part 5~~
 
-* [X]  Change intersection algorithm to count intersections. Assume ray coming out from point torwards +z. If > 0 and % 2 == 1, point is inside
+- [X]  Change intersection algorithm to count intersections. Assume ray coming out from point torwards +z. If > 0 and % 2 == 1, point is inside
 
 ### Part 6
 
-* [ ] Create a dict/list: key: vertice id, values: list[triangle ids that contain vertice]
-* [ ] Find k closest vertices. Smallest distance is to one of their triangles/one of the vertices\
+- [ ] Create a dict/list: key: vertice id, values: list[triangle ids that contain vertice]
+- [ ] Find k closest vertices. Smallest distance is to one of their triangles/one of the vertices\
 
 ### Part 7
 
-* [X] Implement ray marching
+- [X] Implement ray marching
