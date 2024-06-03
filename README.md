@@ -5,3 +5,5 @@ This project was made for the Computational Geometry course in the University of
 You can run the demonstration by cloning this repository and running `python main.py`
 
 Press `<Enter>` to see the next animation or `<r>` to redo the current animation.
+
+When creating the plane, use `<a>` or `<d>` to rotate it.

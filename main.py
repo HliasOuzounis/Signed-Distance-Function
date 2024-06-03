@@ -89,6 +89,9 @@ class Window(scene.Scene3D):
         # skip to part B
         # meshConstructor.next_animation = sdf_constructor
 
+        # Loop part A
+        clear_partA.next_animation = planeConstructor
+
 
 if __name__ == "__main__":
     w = Window(mesh)
