@@ -14,7 +14,7 @@ class KDTreeConstructor(Callback):
         self.mesh = mesh
         self.plane = plane
 
-        self.kd_tree = KDTree(dimensions=2)
+        self.kdTree = KDTree(dimensions=2)
         self.iter = 0
         self.total_iters = 7
         
@@ -31,18 +31,18 @@ class KDTreeConstructor(Callback):
         self.rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
         print("Building KD Tree")
-        self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
+        self.kdTree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
 
     def animate(self) -> bool:
         if self.iter == self.total_iters or not self.draw:
             self.stop_animate()
             return False
 
-        self.kd_tree.draw(self.scene, self.iter, self.rotated_plane_verts[0][2])
+        self.kdTree.draw(self.scene, self.iter, self.rotated_plane_verts[0][2])
         self.iter += 1
         
         return True
     
     def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
         if self.iter != 0:
-            self.kd_tree.clear(scene)
+            self.kdTree.clear(scene)

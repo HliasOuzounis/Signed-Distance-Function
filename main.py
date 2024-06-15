@@ -53,7 +53,7 @@ class Window(scene.Scene3D):
         planeConstructor = PlaneConstructor(meshConstructor.mesh)
         kdTreeConstructor = KDTreeConstructor(meshConstructor.mesh, planeConstructor.plane)
         clearKdTree = ClearCallback(kdTreeConstructor)
-        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, useKDTree=True, kdTree=kdTreeConstructor.kd_tree)
+        pointsConstructor = PointsConstructor(meshConstructor.mesh, planeConstructor.plane, useKDTree=True, kdTree=kdTreeConstructor.kdTree)
 
         meshConstructor.next_animation = planeConstructor
         planeConstructor.next_animation = kdTreeConstructor
@@ -71,7 +71,7 @@ class Window(scene.Scene3D):
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
         # Task 7: Create SDF function
-        sdf_constructor = SDFConstructor(meshConstructor.mesh)
+        sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree)
         clear_partA.next_animation = sdf_constructor
         
         clear_sdf_grid = ClearCallback(sdf_constructor)
@@ -87,10 +87,10 @@ class Window(scene.Scene3D):
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        # meshConstructor.next_animation = sdf_constructor
+        meshConstructor.next_animation = sdf_constructor
 
         # Loop part A
-        clear_partA.next_animation = planeConstructor
+        # clear_partA.next_animation = planeConstructor
 
 
 if __name__ == "__main__":

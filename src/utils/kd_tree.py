@@ -103,11 +103,13 @@ class KDTree:
         self.troot = None
         self.inv_rot_mat = np.eye(3)
         self.dimensions = dimensions
+        self.is_built = False
     
     def build_tree(self, points, triangles, inv_rot_mat):
         self.inv_rot_mat = inv_rot_mat
         self.all_points = np.dot(points, inv_rot_mat)
         self.troot = self._build_tree(self.all_points, triangles)
+        self.is_built = True
 
     def _build_tree(self, points, triangles, depth=0) -> Node:
         if points.shape[0] == 0:

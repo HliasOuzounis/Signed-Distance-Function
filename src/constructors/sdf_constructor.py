@@ -9,7 +9,7 @@ from .callback import Callback, SequenceHandler, Scene3D
 
 
 class SDFConstructor(Callback):
-    def __init__(self, mesh: Mesh3D) -> None:
+    def __init__(self, mesh: Mesh3D, kdTree2D: KDTree) -> None:
         super().__init__()
         self.mesh = mesh
 
@@ -41,8 +41,7 @@ class SDFConstructor(Callback):
         
         self.sdf = SDF(self.grid)
         
-        self.kd_tree = KDTree(dimensions=3)
-        self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, np.eye(3))
+        self.kdTree2D = kdTree2D
 
     def animate_init(self) -> None:
         self.clear(self.sequence, self.scene)
@@ -51,6 +50,9 @@ class SDFConstructor(Callback):
         self.prev_index = 0
         
         self.distances = np.zeros((self.total_points, 1))
+        
+        if not self.kdTree2D.is_built:
+            self.kdTree2D.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3))
 
     @utility.show_fps
     def animate(self) -> bool:    
@@ -66,7 +68,7 @@ class SDFConstructor(Callback):
 
         index = int(self.grid_points.shape[0] * self.l)
 
-        inside = self.kd_tree.is_inside(self.grid_points[self.prev_index : index + 1])
+        inside = self.kdTree2D.is_inside(self.grid_points[self.prev_index : index + 1])
         
         # self.distances[self.prev_index : index + 1] = self.calulate_distanes(self.grid_points[self.prev_index : index + 1])
         # self.distances[inside] *= -1
