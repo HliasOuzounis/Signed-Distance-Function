@@ -94,6 +94,28 @@ def rotation_matrix_from_vectors(vec1: np.array, vec2: np.array) -> np.array:
     rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s**2))
     return rotation_matrix
 
+def rotation_matrix_from_plane_vertices(plane_vertices: np.array) -> np.array:
+    """
+    Get the rotation matrix that aligns the plane normal with the z-axis.
+    
+    Parameters:
+    - plane_vertices: np.array with the vertices of the plane
+    
+    Returns:
+    - rotation_matrix: np.array with the rotation matrix
+    """
+    plane_normal = np.cross(
+        plane_vertices[1] - plane_vertices[0],
+        plane_vertices[2] - plane_vertices[0],
+    )
+    plane_normal /= np.linalg.norm(plane_normal)
+
+    return (
+        rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
+        if not np.isclose(plane_normal[2], 1)
+        else np.eye(3)
+    )
+
 
 def distance_to_triangle(triangle: np.array, point: np.array) -> float:
     a, b, c = triangle

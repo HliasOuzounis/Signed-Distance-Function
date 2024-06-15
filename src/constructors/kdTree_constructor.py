@@ -14,9 +14,9 @@ class KDTreeConstructor(Callback):
         self.mesh = mesh
         self.plane = plane
 
-        self.kd_tree = KDTree()
+        self.kd_tree = KDTree(dimensions=2)
         self.iter = 0
-        self.total_iters = 15
+        self.total_iters = 7
         
         self.draw = draw
 
@@ -24,18 +24,8 @@ class KDTreeConstructor(Callback):
         self.clear(self.sequence, self.scene)
         
         self.iter = 0
-
-        plane_normal = np.cross(
-            self.plane.vertices[1] - self.plane.vertices[0],
-            self.plane.vertices[2] - self.plane.vertices[0],
-        )
-        plane_normal /= np.linalg.norm(plane_normal)
-
-        rot_mat = (
-            utility.rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
-            if not np.isclose(plane_normal[2], 1)
-            else np.eye(3)
-        )
+        
+        rot_mat = utility.rotation_matrix_from_plane_vertices(self.plane.vertices)
 
         inv_rot_mat = rot_mat.T
         self.rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)

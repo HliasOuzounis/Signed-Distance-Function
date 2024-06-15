@@ -39,30 +39,13 @@ class PointsConstructor(Callback):
         self.l = 0
         self.prev_index = 0
 
-        plane_normal = np.cross(
-            self.plane.vertices[1] - self.plane.vertices[0],
-            self.plane.vertices[2] - self.plane.vertices[0],
-        )
-        plane_normal /= np.linalg.norm(plane_normal)
-
-        self.rot_mat = (
-            utility.rotation_matrix_from_vectors(plane_normal, np.array([0, 0, 1]))
-            if not np.isclose(plane_normal[2], 1)
-            else np.eye(3)
-        )
+        # Points are constructed in the plane's coordinate system
+        # and then rotated back to world coordinate system
+        self.rot_mat = utility.rotation_matrix_from_plane_vertices(self.plane.vertices)
         
         inv_rot_mat = self.rot_mat.T
         rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
-        # Points are constructed in the plane's coordinate system
-        # and then rotated back to world coordinate system
-        # self.triangle_params = TriangleParams(self.mesh.triangles, np.dot(self.mesh.vertices, inv_rot_mat))
-        if self.useKDTree:
-            self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, inv_rot_mat)
-
-        # # To visualize the kd tree (keep plane not rotated)
-        # self.kd_tree.draw(self.scene, 3, rotated_plane_verts[0][2])
-        
         self.intersecting.clear()
         self.intersecting_points = np.empty((0, 3))
 
@@ -101,13 +84,12 @@ class PointsConstructor(Callback):
 
         index = int(self.l * self.total_points)
 
-        # interecting_points = self.triangle_params.check_points(self.random_points[self.prev_index : index + 1])
         if self.useKDTree:
-            interecting_points = self.kd_tree.intersects_mesh(  # ~ 2 times faster
+            interecting_points = self.kd_tree.intersects_mesh(  # ~ 4 times faster
                 self.random_points[self.prev_index : index + 1]
             )
             interecting_points_indexes = interecting_points > 0
-
+        
         if self.useRayMarching:
             interecting_points = self.sdf.ray_marching(
                 self.random_points[self.prev_index : index + 1], 

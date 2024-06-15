@@ -41,7 +41,7 @@ class SDFConstructor(Callback):
         
         self.sdf = SDF(self.grid)
         
-        self.kd_tree = KDTree()
+        self.kd_tree = KDTree(dimensions=3)
         self.kd_tree.build_tree(self.mesh.vertices, self.mesh.triangles, np.eye(3))
 
     def animate_init(self) -> None:
