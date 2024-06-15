@@ -1,7 +1,7 @@
 from .callback import Callback
 
 class ClearCallback(Callback):
-    def __init__(self, *callbacks) -> None:
+    def __init__(self, *callbacks: list[Callback]) -> None:
         super().__init__()
         self.callbacks = callbacks
 

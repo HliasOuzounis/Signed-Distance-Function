@@ -87,7 +87,7 @@ class Window(scene.Scene3D):
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        meshConstructor.next_animation = sdf_constructor
+        # meshConstructor.next_animation = sdf_constructor
 
         # Loop part A
         # clear_partA.next_animation = planeConstructor

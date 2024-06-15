@@ -1,7 +1,9 @@
 import numpy as np
 
+from .constants import NDArrayNx3, NDArray1D
+
 class TriangleParams2D:
-    def __init__(self, triangles, points) -> None:
+    def __init__(self, triangles: NDArrayNx3, points: NDArrayNx3) -> None:
         # project onto plane
         triangles = points[triangles]
 
@@ -22,7 +24,7 @@ class TriangleParams2D:
         
         self.mesh_name = None
 
-    def check_points(self, points, count_intersections=False):        
+    def check_points(self, points: NDArrayNx3, count_intersections=False) -> NDArray1D:        
         if points.shape[0] == 0:
             return np.zeros(0)
         
@@ -43,32 +45,3 @@ class TriangleParams2D:
 
         inside = (u >= 0) & (v >= 0) & (w >= 0) & valid
         return np.sum(inside, axis=1)
-    
-    def draw(self, scene, z, inv_rot_mat):
-        import vvrpywork.shapes as shapes
-        mesh = shapes.Mesh3D(color=(1, 0, 0, 0.8))
-        for v1, v2, v3 in zip(self.v0, self.v1, self.v2):
-            v1[2] = z + 0.01
-            v2[2] = z + 0.01
-            v3[2] = z + 0.01
-
-            v1 = np.dot(inv_rot_mat, v1)
-            v2 = np.dot(inv_rot_mat, v2)
-            v3 = np.dot(inv_rot_mat, v3)
-            
-            mesh.vertices = np.concatenate((mesh.vertices, [v1, v2, v3]))
-            index = len(mesh.vertices) - 3
-            mesh.triangles = np.concatenate((mesh.triangles, [[index, index + 1, index + 2]]))
-            
-        self.mesh_name = "".join([str(x) for x in mesh.vertices.ravel()])
-        scene.addShape(mesh, self.mesh_name)
-
-    def clear(self, scene):
-        if self.mesh_name is not None:
-            scene.removeShape(self.mesh_name)
-
-def _test(): ...
-
-
-if __name__ == "__main__":
-    _test()

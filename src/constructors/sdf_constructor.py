@@ -7,6 +7,8 @@ from ..utils import utility
 
 from .callback import Callback, SequenceHandler, Scene3D
 
+from ..utils import NDArrayNx3, NDArray1D
+
 
 class SDFConstructor(Callback):
     def __init__(self, mesh: Mesh3D, kdTree2D: KDTree) -> None:
@@ -87,7 +89,7 @@ class SDFConstructor(Callback):
 
         return True
 
-    def calulate_distanes(self, points: np.array) -> np.array:
+    def calulate_distanes(self, points: NDArrayNx3) -> NDArray1D:
         mesh_vertices = self.mesh.vertices
         
         points = points[:, np.newaxis, :]

@@ -71,7 +71,7 @@ class OutlineConstructor(Callback):
         return True
 
 class GeneratorBatcher:
-    def __init__(self, generator, batch_size) -> None:
+    def __init__(self, generator, batch_size: int) -> None:
         self.generator = generator
         self.batch_size = batch_size
         self.value = None

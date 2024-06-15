@@ -4,6 +4,7 @@ import open3d as o3d
 from vvrpywork.shapes import Mesh3D
 
 from .callback import Callback, SequenceHandler, Scene3D
+from ..utils import NDPoint3D
 
 class PlaneConstructor(Callback):
     def __init__(self, mesh: Mesh3D) -> None:
@@ -80,7 +81,7 @@ class PlaneConstructor(Callback):
         if key == o3d.visualization.gui.KeyName.D:
             self.rotate(np.array([0, -rotate_step, 0]))
 
-    def rotate(self, angle: np.array) -> None:
+    def rotate(self, angle: NDPoint3D) -> None:
         R = o3d.geometry.get_rotation_matrix_from_xyz(angle)
 
         self.plane.vertices = (self.plane.vertices @ R.T)

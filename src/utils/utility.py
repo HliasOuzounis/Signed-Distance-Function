@@ -3,7 +3,9 @@ import numpy as np
 
 from vvrpywork.shapes import Mesh3D
 
-def fit_to_unit_sphere(data):
+from .constants import NDArrayNx3, NDArray1D, NDPoint3D, Matrix3x3
+
+def fit_to_unit_sphere(data: Mesh3D) -> Mesh3D:
     """
     Centers and scales the vertices of a mesh or point cloud to fit within a unit sphere.
 
@@ -30,7 +32,7 @@ def fit_to_unit_sphere(data):
     return data
 
 
-def assign_colors(data):
+def assign_colors(data: Mesh3D) -> NDArrayNx3:
     """
     Assigns random colors to the vertices of a mesh or point cloud based on the distance of the vertices from the axis.
 
@@ -53,7 +55,7 @@ def assign_colors(data):
     return colors
 
 
-def points_positions_relative_to_line(vertices, line_params) -> np.array:
+def points_positions_relative_to_line(vertices: NDArrayNx3, line_params: NDArray1D) -> NDArray1D:
     """
     Determine the positions of points relative to a line defined by its parameters.
 
@@ -73,7 +75,7 @@ def points_positions_relative_to_line(vertices, line_params) -> np.array:
     return is_above_line
 
 
-def rotation_matrix_from_vectors(vec1: np.array, vec2: np.array) -> np.array:
+def rotation_matrix_from_vectors(vec1: NDPoint3D, vec2: NDPoint3D) -> Matrix3x3:
     """
     Find the rotation matrix that aligns vec1 to vec2
     
@@ -93,6 +95,7 @@ def rotation_matrix_from_vectors(vec1: np.array, vec2: np.array) -> np.array:
     kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
     rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s**2))
     return rotation_matrix
+
 
 def rotation_matrix_from_plane_vertices(plane_vertices: np.array) -> np.array:
     """
@@ -139,7 +142,7 @@ def show_fps(func):
 
     return wrap_func
 
-def clear_line():
+def clear_line() -> None:
     import sys
     sys.stdout.write("\033[K")  # Clear to the end of line
     sys.stdout.flush()

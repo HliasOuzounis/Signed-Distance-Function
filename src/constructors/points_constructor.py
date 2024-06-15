@@ -8,7 +8,16 @@ from ..utils import utility
 
 
 class PointsConstructor(Callback):
-    def __init__(self, mesh: Mesh3D, plane: Mesh3D, *, useKDTree=False, kdTree: KDTree|None=None, useRayMarching=False, sdf: SDF|None=None) -> None:
+    def __init__(
+        self,
+        mesh: Mesh3D,
+        plane: Mesh3D,
+        *,
+        useKDTree=False,
+        kdTree: KDTree | None = None,
+        useRayMarching=False,
+        sdf: SDF | None = None,
+    ) -> None:
         super().__init__()
 
         self.mesh = mesh
@@ -26,7 +35,7 @@ class PointsConstructor(Callback):
             if not isinstance(kdTree, KDTree):
                 raise ValueError("KDTree is required for KDTree")
             self.kd_tree = kdTree
-            
+
         if self.useRayMarching:
             if not isinstance(sdf, SDF):
                 raise ValueError("SDF function is required for ray marching")
@@ -42,7 +51,7 @@ class PointsConstructor(Callback):
         # Points are constructed in the plane's coordinate system
         # and then rotated back to world coordinate system
         self.rot_mat = utility.rotation_matrix_from_plane_vertices(self.plane.vertices)
-        
+
         inv_rot_mat = self.rot_mat.T
         rotated_plane_verts = np.dot(self.plane.vertices, inv_rot_mat)
 
@@ -89,28 +98,39 @@ class PointsConstructor(Callback):
                 self.random_points[self.prev_index : index + 1]
             )
             interecting_points_indexes = interecting_points > 0
-        
+
         if self.useRayMarching:
             interecting_points = self.sdf.ray_marching(
-                self.random_points[self.prev_index : index + 1], 
-                -self.plane_normal
+                self.random_points[self.prev_index : index + 1], -self.plane_normal
             )
 
-        self.non_intersecting_points = np.concatenate([
-            self.non_intersecting_points[(self.prev_index - index) * 4:],
-            self.random_points[self.prev_index : index + 1][~interecting_points_indexes]
-        ], axis=0)
-
+        self.non_intersecting_points = np.concatenate(
+            [
+                self.non_intersecting_points[(self.prev_index - index) * 4 :],
+                self.random_points[self.prev_index : index + 1][
+                    ~interecting_points_indexes
+                ],
+            ],
+            axis=0,
+        )
         self.non_intersecting.points = self.non_intersecting_points
-        self.non_intersecting.colors = np.zeros((self.non_intersecting.points.shape[0], 3))
+        self.non_intersecting.colors = np.zeros(
+            (self.non_intersecting.points.shape[0], 3)
+        )
 
-        self.intersecting_points = np.concatenate([
-            self.intersecting_points,
-            self.random_points[self.prev_index : index + 1][interecting_points_indexes]
-        ], axis=0)
-
-        self.intersecting.points = self.intersecting_points            
-        self.intersecting.colors = np.zeros((self.intersecting.points.shape[0], 3)) + np.array([1, 0, 0])
+        self.intersecting_points = np.concatenate(
+            [
+                self.intersecting_points,
+                self.random_points[self.prev_index : index + 1][
+                    interecting_points_indexes
+                ],
+            ],
+            axis=0,
+        )
+        self.intersecting.points = self.intersecting_points
+        self.intersecting.colors = np.zeros(
+            (self.intersecting.points.shape[0], 3)
+        ) + np.array([1, 0, 0])
 
         self.scene.updateShape(self.intersecting_name)
         self.scene.updateShape(self.non_intersecting_name)
@@ -127,11 +147,15 @@ class PointsConstructor(Callback):
 
         plane_area = np.linalg.norm(diag[[0, 2]]) * diag[1]
 
-        print(f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2")
-        print(f"{self.intersecting.points.shape[0]} points out of {self.prev_index} points")
+        print(
+            f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2"
+        )
+        print(
+            f"{self.intersecting.points.shape[0]} points out of {self.prev_index} points"
+        )
 
     def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
         self.l = 0
         scene.removeShape(self.intersecting_name)
         scene.removeShape(self.non_intersecting_name)
-        return True        
+        return True
