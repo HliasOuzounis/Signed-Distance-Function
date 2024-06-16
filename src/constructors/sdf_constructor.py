@@ -18,7 +18,7 @@ class SDFConstructor(Callback):
         self.total_points = point_per_axis**3
         self.step = 1 / 100
 
-        offset = 0.01
+        offset = 0.3
 
         xmin = np.min(self.mesh.vertices[:, 0]) - offset
         xmax = np.max(self.mesh.vertices[:, 0]) + offset
@@ -34,7 +34,6 @@ class SDFConstructor(Callback):
 
         xx, yy, zz = np.meshgrid(x, y, z)
         self.grid_points = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
-
         self.grid = (x, y, z)
 
         self.grid_clouds = {}
@@ -82,9 +81,11 @@ class SDFConstructor(Callback):
         inside = self.kdTree2D.is_inside(
             self.grid_points[self.prev_index: index + 1])
 
-        self.distances[self.prev_index: index + 1] = self.kdTree3D.min_distance(
-            self.grid_points[self.prev_index: index + 1]
-        ).reshape(-1, 1)
+        # self.distances[self.prev_index: index + 1] = self.kdTree3D.min_distance(
+        #     self.grid_points[self.prev_index: index + 1]
+        # ).reshape(-1, 1)
+        self.distances[self.prev_index: index + 1] = np.linalg.norm(self.grid_points[self.prev_index: index + 1], axis=1).reshape(-1, 1) - 1
+
         self.distances[self.prev_index: index + 1][inside] *= -1
 
         grid_colors = np.zeros((inside.shape[0], 3))

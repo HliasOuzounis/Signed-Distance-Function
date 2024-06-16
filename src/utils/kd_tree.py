@@ -37,7 +37,6 @@ class Node(ABC):
 
 
 class KDNode(Node):
-
     def __init__(self, value: NDPoint3D, line: NDArray1D) -> None:
         self.value = value
         self.line = line
@@ -87,7 +86,7 @@ class KDNode(Node):
                 self.left.min_distance(points[~on_right], min_distances[~on_right])
             )
             
-        recheck = min_distances > np.abs(self.distance_to_line(points))
+        recheck = min_distances >= np.abs(self.distance_to_line(points))
         
         if self.right is not None:
             min_distances[recheck & ~on_right] = np.minimum(
@@ -188,14 +187,20 @@ class KDNode(Node):
 
 class KDLeaf(Node):
     def __init__(self, points: NDArrayNx3, triangles: NDArrayNx3, is_2D: bool) -> None:
+        self.is_empty = triangles.shape[0] == 0
         self.triangles = TriangleParams2D(triangles, points) if is_2D else points[triangles]
 
     def check_intersections(
         self, points: NDArrayNx3, count_intersections: bool
     ) -> NDArray1D:
+        if self.is_empty:
+            return np.zeros(points.shape[0])
         return self.triangles.check_points(points, count_intersections)
 
     def min_distance(self, points: NDArrayNx3, min_distances) -> NDArray1D:
+        if self.is_empty:
+            return min_distances
+        
         for i, point in enumerate(points):
             for triangle in self.triangles:
                 to_tuple = tuple(map(tuple, triangle)), tuple(point)
@@ -204,7 +209,8 @@ class KDLeaf(Node):
                     min_distances[i] = min(min_distances[i], distances_hash[to_tuple])
                     continue
 
-                min_distances[i] = min(min_distances[i], utility.distance_to_triangle(triangle, point))
+                closest_point = utility.closest_point_on_mesh(triangle, point)
+                min_distances[i] = min(min_distances[i], np.linalg.norm(closest_point - point))
                 distances_hash[to_tuple] = min_distances[i]
                 global total_checks
                 total_checks += 1
@@ -286,6 +292,7 @@ class KDTree(Node):
         # return self.troot.min_distance(points)
         min_distances = np.ones(points.shape[0]) * np.inf
         a = self.troot.min_distance(points, min_distances)
-        # print(total_checks / points.shape[0])
+        if points.shape[0] > 0:
+            print(total_checks / points.shape[0])
         total_checks = 0
         return a

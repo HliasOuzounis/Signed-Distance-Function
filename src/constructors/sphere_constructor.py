@@ -39,10 +39,11 @@ class SphereConstructor(Callback):
         for point, dist in zip(points, distances):
             sphere = Sphere3D(point, dist[0])
             name = f"sphere_{tuple(point)}"
+            # print(name)
             self.spheres[name] = sphere
             self.scene.addShape(sphere, name)
         
-        self.prev_index = index
+        self.prev_index = index + 1
         
         return True
 

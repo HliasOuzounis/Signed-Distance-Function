@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
-from .constants import NDArrayNx3, NDArray1D, NDPoint3D
+# from .constants import NDArrayNx3, NDArray1D, NDPoint3D
 
 class SDF:
     def __init__(self, grid):
@@ -15,9 +15,12 @@ class SDF:
             bounds_error=False,
             fill_value=None,
         )
+        print(signal.shape)
 
-    def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
-        # points = points.copy()
+    # def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
+    def ray_marching(self, points, direction):
+        points = points.copy()
+        points += direction * 0.2
         intersects = np.zeros(points.shape[0], dtype=bool)
         uncertain = np.ones(points.shape[0], dtype=bool)
 

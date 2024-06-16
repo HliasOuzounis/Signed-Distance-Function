@@ -12,22 +12,32 @@ class TriangleParams2D:
             triangles[:, 1, :],
             triangles[:, 2, :],
         )
-        self.proj_v0 = self.v0[:, :2]
+
         self.edge1 = self.v1[:, :2] - self.v0[:, :2]
         self.edge2 = self.v2[:, :2] - self.v0[:, :2]
+
+        # remove invalid triangles (with 0 area)
+        invalid = (
+            (np.linalg.norm(self.edge1, axis=1) == 0) | 
+            (np.linalg.norm(self.edge2, axis=1) == 0) |
+            (self.edge1 == self.edge2).all(axis=1)
+        )
+        self.v0 = self.v0[~invalid]
+        self.v1 = self.v1[~invalid]
+        self.v2 = self.v2[~invalid]
+        self.edge1 = self.edge1[~invalid]
+        self.edge2 = self.edge2[~invalid]
 
         self.dot00 = np.einsum("ij,ij->i", self.edge1, self.edge1)
         self.dot01 = np.einsum("ij,ij->i", self.edge1, self.edge2)
         self.dot11 = np.einsum("ij,ij->i", self.edge2, self.edge2)
 
         self.inv_denom = 1 / (self.dot00 * self.dot11 - self.dot01 * self.dot01)
-        
-        self.mesh_name = None
 
     def check_points(self, points: NDArrayNx3, count_intersections=False) -> NDArray1D:        
         if points.shape[0] == 0:
             return np.zeros(0)
-        
+
         vp = points[:, np.newaxis, :2] - self.v0[:, :2]
 
         dot20 = np.einsum("ijk,jk->ij", vp, self.edge1)

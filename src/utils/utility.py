@@ -119,7 +119,7 @@ def rotation_matrix_from_plane_vertices(plane_vertices: np.array) -> np.array:
     )
 
 
-def distance_to_triangle(triangle: Matrix3x3, point: NDPoint3D) -> float:
+def closest_point_on_mesh(triangle: Matrix3x3, point: NDPoint3D) -> float:
     """
     Calculates the distance between a point and a triangle in 3D space.
     Taken from the Embree library
@@ -141,42 +141,42 @@ def distance_to_triangle(triangle: Matrix3x3, point: NDPoint3D) -> float:
     d1 = np.dot(ab, ap)
     d2 = np.dot(ac, ap)
     if d1 <= 0.0 and d2 <= 0.0: # 1 (A)
-        return np.linalg.norm(ap)
+        return a
 
     bp = point - b
     d3 = np.dot(ab, bp)
     d4 = np.dot(ac, bp)
     # Project ac and ab on bp. They are equal if bp is perpendicular to bc.
     if d3 >= 0.0 and d4 <= d3: # 2 (B)
-        return np.linalg.norm(bp)
+        return b
 
     cp = point - c
     d5 = np.dot(ab, cp)
     d6 = np.dot(ac, cp)
     if d5 >= 0.0 and d5 <= d6: # 3 (C)
-        return np.linalg.norm(cp)
+        return c
 
     # No idea why it works from this point
     vc = d1*d4 - d3*d2
     if vc <= 0.0 and d1 >= 0.0 and d3 <= 0.0: # 4 (Projection of point on AB)
         v = d1 / (d1 - d3)
-        return np.linalg.norm(a + v * ab - point)
+        return a + v * ab
 
     vb = d5*d2 - d1*d6
     if vb <= 0.0 and d2 >= 0.0 and d6 <= 0.0: # 5 (Projection of point on AC)
         v = d2 / (d2 - d6)
-        return np.linalg.norm(a + d2 * ac - point)
+        return a + d2 * ac
 
     va = d3*d6 - d5*d4
     if va <= 0.0 and (d4 - d3) >= 0.0 and (d5 - d6) >= 0.0: # 6 (Projection of point on BC)
         v = (d4 - d3) / ((d4 - d3) + (d5 - d6))
-        return np.linalg.norm(b + v * bc - point)
+        return b + v * bc
 
     # Else, the point is inside the triangle
     denom = 1.0 / (va + vb + vc)
     v = vb * denom
     w = vc * denom
-    return np.linalg.norm(a + v * ab + w * ac - point)
+    return a + v * ab + w * ac
 
 def show_fps(func):
     from time import time

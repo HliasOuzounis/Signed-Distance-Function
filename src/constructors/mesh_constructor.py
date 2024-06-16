@@ -38,17 +38,16 @@ class MeshConstructor(Callback):
 
     def animate(self) -> bool:
         if self.l > self.limit:
-
             wireframe = LineSet3D.create_from_mesh(self.mesh)
             self.scene.addShape(wireframe, "wireframe")
             self.stop_animate()
-
+            
         index = int(self.l * self.total)
         self.mesh.triangles = self.mesh_triangles[:index + 1]
         self.mesh.triangle_normals = self.mesh_normals[:index + 1]
 
         self.l += self.step
-
+        
         self.scene.updateShape(self.mesh_id)
 
         return True

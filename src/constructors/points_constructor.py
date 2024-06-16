@@ -86,7 +86,7 @@ class PointsConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
-            self.scene.removeShape(self.non_intersecting_name)
+            # self.scene.removeShape(self.non_intersecting_name)
             self.estimate_area()
             self.stop_animate()
             return True
@@ -107,7 +107,7 @@ class PointsConstructor(Callback):
         interecting_points_indexes = interecting_points > 0
         self.non_intersecting_points = np.concatenate(
             [
-                self.non_intersecting_points[(self.prev_index - index) * 4 :],
+                self.non_intersecting_points,#[(self.prev_index - index) * 4 :],
                 self.random_points[self.prev_index : index + 1][
                     ~interecting_points_indexes
                 ],

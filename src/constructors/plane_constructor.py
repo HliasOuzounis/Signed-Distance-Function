@@ -12,7 +12,7 @@ class PlaneConstructor(Callback):
         self.mesh = mesh
 
         self.mesh_vertices = self.mesh.vertices
-        offset = 0.2
+        offset = 0.3
         maxx = np.max(self.mesh_vertices[:, 0]) + offset
         minx = np.min(self.mesh_vertices[:, 0]) - offset
         maxy = np.max(self.mesh_vertices[:, 1]) + offset
