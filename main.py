@@ -71,7 +71,7 @@ class Window(scene.Scene3D):
 
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
-        # Task 7: Create SDF function
+        # Task 7: Create SDFe function
         sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree)
         clear_partA.next_animation = sdf_constructor
         

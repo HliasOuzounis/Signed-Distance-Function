@@ -20,7 +20,6 @@ class SDF:
     # def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
     def ray_marching(self, points, direction):
         points = points.copy()
-        points += direction * 0.2
         intersects = np.zeros(points.shape[0], dtype=bool)
         uncertain = np.ones(points.shape[0], dtype=bool)
 
@@ -29,7 +28,7 @@ class SDF:
         d = 1e-5
         
         while np.any(uncertain):
-            new_points = points[uncertain] + direction * distances[uncertain].reshape(-1, 1) * 0.9
+            new_points = points[uncertain] + direction * distances[uncertain].reshape(-1, 1)
             points[uncertain] = new_points
             new_distances = self.interpolator(new_points)
 

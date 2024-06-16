@@ -86,7 +86,7 @@ class SDFConstructor(Callback):
         # ).reshape(-1, 1)
         self.distances[self.prev_index: index + 1] = np.linalg.norm(self.grid_points[self.prev_index: index + 1], axis=1).reshape(-1, 1) - 1
 
-        self.distances[self.prev_index: index + 1][inside] *= -1
+        # self.distances[self.prev_index: index + 1][inside] *= -1
 
         grid_colors = np.zeros((inside.shape[0], 3))
         grid_colors[inside] = (
