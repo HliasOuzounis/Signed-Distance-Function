@@ -4,8 +4,12 @@ from .triangle_params import TriangleParams2D
 from .constants import NDArray1D, NDArrayNx3, Matrix3x3, NDPoint3D
 from vvrpywork.scene import Scene3D
 
+from . import utility
+
 from abc import ABC
 
+distances_hash = {}
+total_checks = 0
 
 class Node(ABC):
     def check_intersections(
@@ -28,6 +32,10 @@ class Node(ABC):
         pass
 
 
+    def min_distance(self, points: NDArrayNx3) -> NDArray1D:
+        pass
+
+
 class KDNode(Node):
 
     def __init__(self, value: NDPoint3D, line: NDArray1D) -> None:
@@ -47,23 +55,60 @@ class KDNode(Node):
 
         on_right = self.is_on_right(points)
 
-        interescts_right = np.zeros_like(points[:, 0])
+        interescts = np.zeros_like(points[:, 0])
+
         if self.right is not None:
-            interescts_right[on_right] = self.right.check_intersections(
+            interescts[on_right] = self.right.check_intersections(
                 points[on_right], count_intersections
             )
 
-        interescts_left = np.zeros_like(points[:, 0])
         if self.left is not None:
-            interescts_left[~on_right] = self.left.check_intersections(
+            interescts[~on_right] = self.left.check_intersections(
                 points[~on_right], count_intersections
             )
 
-        return interescts_right + interescts_left
+        return interescts
+
+    def min_distance(self, points: NDArrayNx3, min_distances: NDArrayNx3) -> NDArray1D:
+        if points.shape[0] == 0:
+            return np.zeros(0)
+
+        on_right = self.is_on_right(points)
+        
+        if self.right is not None:
+            min_distances[on_right] = np.minimum(
+                min_distances[on_right],
+                self.right.min_distance(points[on_right], min_distances[on_right])
+            )
+
+        if self.left is not None:
+            min_distances[~on_right] = np.minimum(
+                min_distances[~on_right],
+                self.left.min_distance(points[~on_right], min_distances[~on_right])
+            )
+            
+        recheck = min_distances > np.abs(self.distance_to_line(points))
+        
+        if self.right is not None:
+            min_distances[recheck & ~on_right] = np.minimum(
+                min_distances[recheck & ~on_right],
+                self.right.min_distance(points[recheck & ~on_right], min_distances[recheck & ~on_right]),
+            )
+        if self.left is not None:
+            min_distances[recheck & on_right] = np.minimum(
+                min_distances[recheck & on_right],
+                self.left.min_distance(points[recheck & on_right], min_distances[recheck & on_right])
+            )
+            
+        return min_distances
+        
 
     def is_on_right(self, points: NDArrayNx3) -> NDArray1D:
-        points = points[:, :2]
-        return np.dot(points, self.line[:2]) > self.line[2]
+        return self.distance_to_line(points) > 0
+
+    def distance_to_line(self, points: NDArrayNx3) -> NDArray1D:
+        points = points[:, : self.line.shape[0] - 1]
+        return np.dot(points, self.line[:-1]) - self.line[-1]
 
     def draw(
         self,
@@ -142,16 +187,32 @@ class KDNode(Node):
 
 
 class KDLeaf(Node):
-    def __init__(self, points, triangles) -> None:
-        self.triangle_params = TriangleParams2D(triangles, points)
+    def __init__(self, points: NDArrayNx3, triangles: NDArrayNx3, is_2D: bool) -> None:
+        self.triangles = TriangleParams2D(triangles, points) if is_2D else points[triangles]
 
     def check_intersections(
         self, points: NDArrayNx3, count_intersections: bool
     ) -> NDArray1D:
-        return self.triangle_params.check_points(points, count_intersections)
+        return self.triangles.check_points(points, count_intersections)
+
+    def min_distance(self, points: NDArrayNx3, min_distances) -> NDArray1D:
+        for i, point in enumerate(points):
+            for triangle in self.triangles:
+                to_tuple = tuple(map(tuple, triangle)), tuple(point)
+                
+                if to_tuple in distances_hash:
+                    min_distances[i] = min(min_distances[i], distances_hash[to_tuple])
+                    continue
+
+                min_distances[i] = min(min_distances[i], utility.distance_to_triangle(triangle, point))
+                distances_hash[to_tuple] = min_distances[i]
+                global total_checks
+                total_checks += 1
+
+        return min_distances
 
 
-class KDTree:
+class KDTree(Node):
     def __init__(self, dimensions) -> None:
         self.all_points = np.empty((0, 3))
         self.troot = None
@@ -165,9 +226,11 @@ class KDTree:
         self.troot = self._build_tree(self.all_points, triangles)
         self.is_built = True
 
-    def _build_tree(self, points: NDArrayNx3, triangles: NDArrayNx3, depth: int = 0) -> Node:
+    def _build_tree(
+        self, points: NDArrayNx3, triangles: NDArrayNx3, depth: int = 0
+    ) -> Node:
         if points.shape[0] == 0:
-            return KDLeaf(self.all_points, triangles)
+            return KDLeaf(self.all_points, triangles, self.dimensions == 2)
 
         dim = depth % self.dimensions
         median_idx = np.argpartition(points, points.shape[0] // 2, axis=0)[
@@ -216,3 +279,13 @@ class KDTree:
 
     def clear(self, scene: Scene3D) -> None:
         self.troot.clear(scene)
+
+    def min_distance(self, points: NDArrayNx3) -> NDArray1D:
+        global total_checks
+        points = np.dot(points, self.inv_rot_mat)
+        # return self.troot.min_distance(points)
+        min_distances = np.ones(points.shape[0]) * np.inf
+        a = self.troot.min_distance(points, min_distances)
+        # print(total_checks / points.shape[0])
+        total_checks = 0
+        return a
