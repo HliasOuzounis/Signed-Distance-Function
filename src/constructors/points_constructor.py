@@ -97,13 +97,14 @@ class PointsConstructor(Callback):
             interecting_points = self.kd_tree.intersects_mesh(  # ~ 4 times faster
                 self.random_points[self.prev_index : index + 1]
             )
-            interecting_points_indexes = interecting_points > 0
 
         if self.useRayMarching:
             interecting_points = self.sdf.ray_marching(
-                self.random_points[self.prev_index : index + 1], -self.plane_normal
+                self.random_points[self.prev_index : index + 1],
+                np.dot(self.rot_mat.T, np.array([0, 0, 1])),
             )
 
+        interecting_points_indexes = interecting_points > 0
         self.non_intersecting_points = np.concatenate(
             [
                 self.non_intersecting_points[(self.prev_index - index) * 4 :],

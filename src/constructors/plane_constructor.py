@@ -32,6 +32,8 @@ class PlaneConstructor(Callback):
         self.plane_name = "plane"
 
     def animate_init(self) -> None:
+        self.clear(self.sequence, self.scene)
+        
         self.l = 0
 
         self.points = np.array([self.start1, self.start2, self.start1, self.start2])
@@ -39,8 +41,6 @@ class PlaneConstructor(Callback):
         self.plane.triangles = np.array([[0, 1, 2], [3, 2, 1]])
         self.plane.color = [0.5, 0.5, 0.5]
 
-
-        self.scene.removeShape(self.plane_name)
         self.scene.addShape(self.plane, self.plane_name)
 
     def animate(self) -> bool:

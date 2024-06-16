@@ -9,7 +9,8 @@ from src.constructors import (
     PointsConstructor,
     OutlineConstructor,
     ClearCallback,
-    SDFConstructor
+    SDFConstructor,
+    SphereConstructor,
 )
 
 from vvrpywork import scene, shapes
@@ -74,13 +75,15 @@ class Window(scene.Scene3D):
         sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree)
         clear_partA.next_animation = sdf_constructor
         
-        clear_sdf_grid = ClearCallback(sdf_constructor)
-        sdf_constructor.next_animation = clear_sdf_grid
+        sphere_constructor = SphereConstructor(sdf_constructor.grid_points, sdf_constructor.distances)
+        sdf_constructor.next_animation = sphere_constructor
+        clear_sdf_grid = ClearCallback(sdf_constructor, sphere_constructor)
+        sphere_constructor.next_animation = clear_sdf_grid
+        
         planeConstructorB = PlaneConstructor(meshConstructor.mesh)
         clear_sdf_grid.next_animation = planeConstructorB
-        
         pointsConstructorB = PointsConstructor(meshConstructor.mesh, planeConstructorB.plane, useRayMarching=True, sdf=sdf_constructor.sdf)
-        clear_sdf_grid.next_animation = pointsConstructorB
+        planeConstructorB.next_animation = pointsConstructorB
 
         # Task 8 & 9: Calculate outline of the projected points & Calculate area of projection 
         outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting, planeConstructorB.plane)

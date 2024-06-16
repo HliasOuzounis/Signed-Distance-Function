@@ -5,3 +5,4 @@ from .points_constructor import PointsConstructor
 from .outline_constructor import OutlineConstructor
 from .clear_callback import ClearCallback
 from .sdf_constructor import SDFConstructor
+from .sphere_constructor import SphereConstructor

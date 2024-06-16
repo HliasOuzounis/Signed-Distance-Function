@@ -7,16 +7,13 @@ from ..utils import utility
 
 from .callback import Callback, SequenceHandler, Scene3D
 
-from ..utils import NDArrayNx3, NDArray1D
-
-
 
 class SDFConstructor(Callback):
     def __init__(self, mesh: Mesh3D, kdTree2D: KDTree) -> None:
         super().__init__()
         self.mesh = mesh
 
-        self.total_points = 5**3
+        self.total_points = 15**3
         point_per_axis = int(self.total_points ** (1 / 3)) + 1
         self.total_points = point_per_axis**3
         self.step = 1 / 100
@@ -43,6 +40,7 @@ class SDFConstructor(Callback):
         self.grid_clouds = {}
 
         self.sdf = SDF(self.grid)
+        self.distances = np.zeros((self.total_points, 1))
 
         self.kdTree2D = kdTree2D
         self.kdTree3D = KDTree(dimensions=3)
@@ -52,8 +50,6 @@ class SDFConstructor(Callback):
 
         self.l = 0
         self.prev_index = 0
-
-        self.distances = np.zeros((self.total_points, 1))
 
         if not self.kdTree2D.is_built:
             self.kdTree2D.build_tree(
@@ -83,22 +79,26 @@ class SDFConstructor(Callback):
 
         index = int(self.grid_points.shape[0] * self.l)
 
-        inside = self.kdTree2D.is_inside(self.grid_points[self.prev_index : index + 1])
+        inside = self.kdTree2D.is_inside(
+            self.grid_points[self.prev_index: index + 1])
 
-        self.distances[self.prev_index : index + 1] = self.kdTree3D.min_distance(
-            self.grid_points[self.prev_index : index + 1]
+        self.distances[self.prev_index: index + 1] = self.kdTree3D.min_distance(
+            self.grid_points[self.prev_index: index + 1]
         ).reshape(-1, 1)
-        self.distances[self.prev_index : index + 1][inside] *= -1
+        self.distances[self.prev_index: index + 1][inside] *= -1
 
         grid_colors = np.zeros((inside.shape[0], 3))
         grid_colors[inside] = (
-            np.array([[0, 0, 1]]) * -self.distances[self.prev_index : index + 1][inside]
+            np.array([[0, 0, 1]]) * -
+            self.distances[self.prev_index: index + 1][inside]
         )
         grid_colors[~inside] = (
-            np.array([[1, 0, 0]]) * self.distances[self.prev_index : index + 1][~inside]
+            np.array([[1, 0, 0]]) *
+            self.distances[self.prev_index: index + 1][~inside]
         )
 
-        grid_cloud = PointSet3D(self.grid_points[self.prev_index : index + 1], size=5)
+        grid_cloud = PointSet3D(
+            self.grid_points[self.prev_index: index + 1], size=1)
         grid_cloud.colors = grid_colors
         name = f"grid_cloud_{self.prev_index}_{index}"
         self.grid_clouds[name] = grid_cloud
@@ -107,23 +107,6 @@ class SDFConstructor(Callback):
         self.prev_index = index
 
         return True
-
-    def calulate_distanes(self, points: NDArrayNx3) -> NDArray1D:
-        mesh_vertices = self.mesh.vertices
-
-        distances = np.inf * np.ones((points.shape[0], 1))
-        for triangle in self.mesh.triangles:
-            for i, point in enumerate(points):
-                
-                distances[i] = np.minimum(
-                    distances[i],
-                    utility.distance_to_triangle(
-                        mesh_vertices[triangle],
-                        point,
-                    ),
-                )
-
-        return distances
 
     def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:
         for key in self.grid_clouds:
