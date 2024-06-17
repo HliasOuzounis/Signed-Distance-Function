@@ -195,7 +195,7 @@ class KDLeaf(Node):
     ) -> NDArray1D:
         if self.is_empty:
             return np.zeros(points.shape[0])
-        return self.triangles.check_points(points, count_intersections)
+        return self.triangles.find_intersections(points, count_intersections)
 
     def min_distance(self, points: NDArrayNx3, min_distances) -> NDArray1D:
         if self.is_empty:
