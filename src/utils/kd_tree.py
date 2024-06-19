@@ -1,6 +1,6 @@
 import numpy as np
 
-from .triangle_params import TriangleParams2D
+from .triangle_params import TriangleParams2D, TriangleParams3D
 from .constants import NDArray1D, NDArrayNx3, Matrix3x3, NDPoint3D
 from vvrpywork.scene import Scene3D
 
@@ -32,7 +32,7 @@ class Node(ABC):
         pass
 
 
-    def min_distance(self, points: NDArrayNx3) -> NDArray1D:
+    def get_closest_points(self, points: NDArrayNx3) -> NDArray1D:
         pass
 
 
@@ -68,38 +68,44 @@ class KDNode(Node):
 
         return interescts
 
-    def min_distance(self, points: NDArrayNx3, min_distances: NDArrayNx3) -> NDArray1D:
+    def get_closest_points(self, points: NDArrayNx3, closest_points: NDArrayNx3, distances: NDArray1D) -> tuple[NDArrayNx3, NDArray1D]:
         if points.shape[0] == 0:
-            return np.zeros(0)
+            return np.zeros((0, 3)), np.zeros(0) 
 
         on_right = self.is_on_right(points)
         
         if self.right is not None:
-            min_distances[on_right] = np.minimum(
-                min_distances[on_right],
-                self.right.min_distance(points[on_right], min_distances[on_right])
-            )
+            new_closest_points, new_distances = self.right.get_closest_points(points[on_right], closest_points[on_right], distances[on_right])
+            improved = new_distances < distances[on_right]
+            changed = on_right & improved
+            closest_points[changed] = new_closest_points[improved]
+            distances[changed] = new_distances[improved]
+
 
         if self.left is not None:
-            min_distances[~on_right] = np.minimum(
-                min_distances[~on_right],
-                self.left.min_distance(points[~on_right], min_distances[~on_right])
-            )
+            new_closest_points, new_distances = self.left.get_closest_points(points[~on_right], closest_points[~on_right], distances[~on_right])
+            improved = new_distances < distances[~on_right]
+            changed = ~on_right & improved
+            closest_points[changed] = new_closest_points[improved]
+            distances[changed] = new_distances[improved]
             
-        recheck = min_distances >= np.abs(self.distance_to_line(points))
+        recheck = distances >= np.abs(self.distance_to_line(points))
         
         if self.right is not None:
-            min_distances[recheck & ~on_right] = np.minimum(
-                min_distances[recheck & ~on_right],
-                self.right.min_distance(points[recheck & ~on_right], min_distances[recheck & ~on_right]),
-            )
+            new_closest_points, new_distances = self.right.get_closest_points(points[recheck & on_right], closest_points[recheck & on_right], distances[recheck & on_right])
+            improved = new_distances < distances[recheck & on_right]
+            changed = recheck & on_right & improved
+            closest_points[changed] = new_closest_points[improved]
+            distances[changed] = new_distances[improved]
+
         if self.left is not None:
-            min_distances[recheck & on_right] = np.minimum(
-                min_distances[recheck & on_right],
-                self.left.min_distance(points[recheck & on_right], min_distances[recheck & on_right])
-            )
-            
-        return min_distances
+            new_closest_points, new_distances = self.left.get_closest_points(points[recheck & ~on_right], closest_points[recheck & ~on_right], distances[recheck & ~on_right])
+            improved = new_distances < distances[recheck & ~on_right]
+            changed = recheck & ~on_right & improved
+            closest_points[changed] = new_closest_points[improved]
+            distances[changed] = new_distances[improved]
+        
+        return closest_points, distances
         
 
     def is_on_right(self, points: NDArrayNx3) -> NDArray1D:
@@ -188,7 +194,8 @@ class KDNode(Node):
 class KDLeaf(Node):
     def __init__(self, points: NDArrayNx3, triangles: NDArrayNx3, is_2D: bool) -> None:
         self.is_empty = triangles.shape[0] == 0
-        self.triangles = TriangleParams2D(triangles, points) if is_2D else points[triangles]
+        if not self.is_empty:
+            self.triangles = TriangleParams2D(triangles, points) if is_2D else TriangleParams3D(triangles, points)
 
     def check_intersections(
         self, points: NDArrayNx3, count_intersections: bool
@@ -197,29 +204,13 @@ class KDLeaf(Node):
             return np.zeros(points.shape[0])
         return self.triangles.find_intersections(points, count_intersections)
 
-    def min_distance(self, points: NDArrayNx3, min_distances) -> NDArray1D:
+    def get_closest_points(self, points: NDArrayNx3, closest_points: NDArrayNx3, distances: NDArray1D) -> tuple[NDArrayNx3, NDArray1D]:
         if self.is_empty:
-            return min_distances
-        
-        for i, point in enumerate(points):
-            for triangle in self.triangles:
-                to_tuple = tuple(map(tuple, triangle)), tuple(point)
-                
-                if to_tuple in distances_hash:
-                    min_distances[i] = min(min_distances[i], distances_hash[to_tuple])
-                    continue
-
-                closest_point = utility.closest_point_on_mesh(triangle, point)
-                min_distances[i] = min(min_distances[i], np.linalg.norm(closest_point - point))
-                distances_hash[to_tuple] = min_distances[i]
-                global total_checks
-                total_checks += 1
-
-        return min_distances
-
+            return closest_points, distances
+        return self.triangles.get_closest_points(points)
 
 class KDTree(Node):
-    def __init__(self, dimensions) -> None:
+    def __init__(self, dimensions: int) -> None:
         self.all_points = np.empty((0, 3))
         self.troot = None
         self.inv_rot_mat = np.eye(3)
@@ -286,13 +277,18 @@ class KDTree(Node):
     def clear(self, scene: Scene3D) -> None:
         self.troot.clear(scene)
 
-    def min_distance(self, points: NDArrayNx3) -> NDArray1D:
-        global total_checks
-        points = np.dot(points, self.inv_rot_mat)
-        # return self.troot.min_distance(points)
-        min_distances = np.ones(points.shape[0]) * np.inf
-        a = self.troot.min_distance(points, min_distances)
-        if points.shape[0] > 0:
-            print(total_checks / points.shape[0])
-        total_checks = 0
-        return a
+    # def get_closest_points(self, points: NDArrayNx3) -> NDArray1D:
+    #     global total_checks
+    #     points = np.dot(points, self.inv_rot_mat)
+    #     # return self.troot.get_closest_points(points)
+    #     get_closest_pointss = np.ones(points.shape[0]) * np.inf
+    #     a = self.troot.get_closest_points(points, get_closest_pointss)
+    #     if points.shape[0] > 0:
+    #         print(total_checks / points.shape[0])
+    #     total_checks = 0
+    #     return a
+
+    def closest_point(self, point: NDArrayNx3) -> NDArrayNx3:
+        closest_points = np.zeros((point.shape[0], 3))
+        distances = np.ones(point.shape[0]) * np.inf
+        return self.troot.get_closest_points(point, closest_points, distances)

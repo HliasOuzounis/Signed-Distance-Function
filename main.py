@@ -15,7 +15,7 @@ from src.constructors import (
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/sphere.ply")
+mesh = shapes.Mesh3D("models/CatMesh.ply")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}, Vertices: {len(mesh.vertices)}")
 
@@ -90,7 +90,7 @@ class Window(scene.Scene3D):
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        meshConstructor.next_animation = sdf_constructor
+        # meshConstructor.next_animation = sdf_constructor
 
         # Loop part A
         # clear_partA.next_animation = planeConstructor
