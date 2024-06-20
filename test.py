@@ -18,7 +18,7 @@ from src.utils import KDTree
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/sphere.ply")
+mesh = shapes.Mesh3D("models/CatMesh.ply")
 print(
     f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})"
 )

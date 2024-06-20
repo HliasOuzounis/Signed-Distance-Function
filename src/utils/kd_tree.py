@@ -77,7 +77,8 @@ class KDNode(Node):
         if self.right is not None:
             new_closest_points, new_distances = self.right.get_closest_points(points[on_right], closest_points[on_right], distances[on_right])
             improved = new_distances < distances[on_right]
-            changed = on_right & improved
+            changed = np.zeros_like(on_right)
+            changed[on_right] = improved
             closest_points[changed] = new_closest_points[improved]
             distances[changed] = new_distances[improved]
 
@@ -85,23 +86,26 @@ class KDNode(Node):
         if self.left is not None:
             new_closest_points, new_distances = self.left.get_closest_points(points[~on_right], closest_points[~on_right], distances[~on_right])
             improved = new_distances < distances[~on_right]
-            changed = ~on_right & improved
+            changed = np.zeros_like(on_right)
+            changed[~on_right] = improved
             closest_points[changed] = new_closest_points[improved]
             distances[changed] = new_distances[improved]
             
         recheck = distances >= np.abs(self.distance_to_line(points))
         
         if self.right is not None:
-            new_closest_points, new_distances = self.right.get_closest_points(points[recheck & on_right], closest_points[recheck & on_right], distances[recheck & on_right])
-            improved = new_distances < distances[recheck & on_right]
-            changed = recheck & on_right & improved
+            new_closest_points, new_distances = self.right.get_closest_points(points[recheck & ~on_right], closest_points[recheck & ~on_right], distances[recheck & ~on_right])
+            improved = new_distances < distances[recheck & ~on_right]
+            changed = np.zeros_like(recheck)
+            changed[recheck & ~on_right] = improved
             closest_points[changed] = new_closest_points[improved]
             distances[changed] = new_distances[improved]
 
         if self.left is not None:
-            new_closest_points, new_distances = self.left.get_closest_points(points[recheck & ~on_right], closest_points[recheck & ~on_right], distances[recheck & ~on_right])
-            improved = new_distances < distances[recheck & ~on_right]
-            changed = recheck & ~on_right & improved
+            new_closest_points, new_distances = self.left.get_closest_points(points[recheck & on_right], closest_points[recheck & on_right], distances[recheck & on_right])
+            improved = new_distances < distances[recheck & on_right]
+            changed = np.zeros_like(recheck)
+            changed[recheck & on_right] = improved
             closest_points[changed] = new_closest_points[improved]
             distances[changed] = new_distances[improved]
         

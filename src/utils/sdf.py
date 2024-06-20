@@ -19,7 +19,7 @@ class SDF:
 
     # def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
     def ray_marching(self, points, direction):
-        points = points.copy()
+        # points = points.copy()
         intersects = np.zeros(points.shape[0], dtype=bool)
         uncertain = np.ones(points.shape[0], dtype=bool)
 

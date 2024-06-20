@@ -157,48 +157,6 @@ class TriangleParams3D(TriangleParams):
 
         closest_points = np.ones((u.shape[0], 3)) * np.inf
         distances = np.ones(u.shape[0]) * np.inf
-        
-        if u_neg.any():
-            new_points = (self.og_v1[u_neg] * v[u_neg][:, None] + self.og_v2[u_neg] * w[u_neg][:, None]) / (1 - u[u_neg][:, None])
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = (distances[u_neg] > new_distances) & u_neg
-            closest_points[improved] = new_points[improved]
-            distances[improved] = new_distances[improved]
-
-        if v_neg.any():
-            new_points = (self.og_v0[v_neg] * u[v_neg][:, None] + self.og_v2[v_neg] * w[v_neg][:, None]) / (1 - v[v_neg][:, None])
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = distances[v_neg] > new_distances
-            closest_points[improved & v_neg] = new_points[improved]
-            distances[improved] = new_distances[improved]
-
-        if w_neg.any():
-            new_points = (self.og_v0[w_neg] * u[w_neg][:, None] + self.og_v1[w_neg] * v[w_neg][:, None]) / (1 - w[w_neg][:, None])
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = (distances[w_neg] > new_distances) & w_neg
-            closest_points[improved] = new_points[improved]
-            distances[improved] = new_distances[improved]
-
-        if (u_neg & v_neg).any():
-            new_points = self.og_v2[u_neg & v_neg]
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = (distances[u_neg & v_neg] > new_distances) & (u_neg & v_neg)
-            closest_points[improved] = new_points[improved]
-            distances[improved] = new_distances[improved]
-
-        if (u_neg & w_neg).any():
-            new_points = self.og_v1[u_neg & w_neg]
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = (distances[u_neg & w_neg] > new_distances) & (u_neg & w_neg)
-            closest_points[improved] = new_points[improved]
-            distances[improved] = new_distances[improved]
-        
-        if (v_neg & w_neg).any():
-            new_points = self.og_v0[v_neg & w_neg]
-            new_distances = np.linalg.norm(point - new_points, axis=1)
-            improved = (distances[v_neg & w_neg] > new_distances) & (v_neg & w_neg)
-            closest_points[improved] = new_points[improved]
-            distances[improved] = new_distances[improved]
 
         if (~(u_neg | v_neg | w_neg)).any():
             inside = ~(u_neg | v_neg | w_neg)
@@ -207,14 +165,78 @@ class TriangleParams3D(TriangleParams):
                 + self.og_v1[inside] * v[inside][:, None]
                 + self.og_v2[inside] * w[inside][:, None]
             )
-            distances[inside] = np.linalg.norm(point - closest_points[inside], axis=1)
+            distances[inside] = np.linalg.norm(closest_points[inside] - point, axis=1)
+            
+        banned = np.zeros_like(u_neg, dtype=bool) 
+
+        if (u_neg & v_neg).any():
+            new_points = self.og_v2[u_neg & v_neg]
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[u_neg & v_neg] > new_distances
+            changed = np.zeros_like(u_neg, dtype=bool)
+            changed[u_neg & v_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
+            
+            banned |= (u_neg & v_neg)
+            
+        if (u_neg & w_neg).any():
+            new_points = self.og_v1[u_neg & w_neg]
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[u_neg & w_neg] > new_distances
+            changed = np.zeros_like(u_neg, dtype=bool)
+            changed[u_neg & w_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
+            banned |= (u_neg & w_neg)
+
+        if (v_neg & w_neg).any():
+            new_points = self.og_v0[v_neg & w_neg]
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[v_neg & w_neg] > new_distances
+            changed = np.zeros_like(v_neg, dtype=bool)
+            changed[v_neg & w_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
+            banned |= (v_neg & w_neg)
+            
+        u_neg &= ~banned
+        v_neg &= ~banned
+        w_neg &= ~banned
+
+        if u_neg.any():
+            new_points = (self.og_v1[u_neg] * v[u_neg][:, None] + self.og_v2[u_neg] * w[u_neg][:, None]) / (1 - u[u_neg][:, None])
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[u_neg] > new_distances
+            changed = np.zeros_like(u_neg, dtype=bool)
+            changed[u_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
+
+        if v_neg.any():
+            new_points = (self.og_v0[v_neg] * u[v_neg][:, None] + self.og_v2[v_neg] * w[v_neg][:, None]) / (1 - v[v_neg][:, None])
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[v_neg] > new_distances
+            changed = np.zeros_like(v_neg, dtype=bool)
+            changed[v_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
+
+        if w_neg.any():
+            new_points = (self.og_v0[w_neg] * u[w_neg][:, None] + self.og_v1[w_neg] * v[w_neg][:, None]) / (1 - w[w_neg][:, None])
+            new_distances = np.linalg.norm(new_points - point, axis=1)
+            improved = distances[w_neg] > new_distances
+            changed = np.zeros_like(w_neg, dtype=bool)
+            changed[w_neg] = improved
+            closest_points[changed] = new_points[improved]
+            distances[changed] = new_distances[improved]
 
         min_dist = np.argmin(distances)
         
-        print("------------------------")
-        print(distances[min_dist], self.og_v0[min_dist], self.og_v1[min_dist], self.og_v2[min_dist])
-        print(u[min_dist], v[min_dist], w[min_dist])
-        print(point, closest_points[min_dist])
+        # print("------------------------")
+        # print(distances[min_dist], self.og_v0[min_dist], self.og_v1[min_dist], self.og_v2[min_dist])
+        # print(u[min_dist], v[min_dist], w[min_dist])
+        # print(point, closest_points[min_dist])
         
         return closest_points[min_dist], distances[min_dist]
 
