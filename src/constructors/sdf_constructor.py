@@ -57,7 +57,7 @@ class SDFConstructor(Callback):
                 self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
             )
 
-        if not self.kdTree3D.is_built:
+        if not self.kdTree3D.is_built and not self.load_disances:
             self.kdTree3D.build_tree(
                 self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
             )

@@ -17,14 +17,17 @@ class PlaneConstructor(Callback):
         minx = np.min(self.mesh_vertices[:, 0]) - offset
         maxy = np.max(self.mesh_vertices[:, 1]) + offset
         miny = np.min(self.mesh_vertices[:, 1]) - offset
-        # z = np.max(self.mesh_vertices[:, 2]) + offset
-        z = np.max(np.linalg.norm(self.mesh_vertices, axis=1)) + offset
+        minz = np.min(self.mesh_vertices[:, 2]) - offset
+        maxz = np.max(self.mesh_vertices[:, 2]) + offset
 
-        self.start1 = np.array([minx, miny, -z])
-        self.start2 = np.array([maxx, miny, -z])
+        min_side = min(minx, miny, minz)
+        max_side = max(maxx, maxy, maxz)
 
-        self.end1 = np.array([minx, maxy, -z])
-        self.end2 = np.array([maxx, maxy, -z])
+        self.start1 = np.array([min_side, min_side, -max_side])
+        self.start2 = np.array([max_side, min_side, -max_side])
+
+        self.end1 = np.array([min_side, max_side, -max_side])
+        self.end2 = np.array([max_side, max_side, -max_side])
 
         self.step = 1 / 100
 

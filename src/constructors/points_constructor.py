@@ -41,7 +41,7 @@ class PointsConstructor(Callback):
                 raise ValueError("SDF function is required for ray marching")
             self.sdf = sdf
 
-        self.total_points = 15000
+        self.total_points = 25000
         self.step = 1 / 100
 
     def animate_init(self) -> None:
