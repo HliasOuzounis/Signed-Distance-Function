@@ -47,7 +47,7 @@ class Callback(ABC):
         """
         Skip the current animation
         """
-        self.l = 1
+        # self.l = 1
         return
 
     # @abstractmethod

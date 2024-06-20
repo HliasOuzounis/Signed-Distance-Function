@@ -233,6 +233,9 @@ class KDTree(Node):
         if points.shape[0] == 0:
             return KDLeaf(self.all_points, triangles, self.dimensions == 2)
 
+        if self.dimensions == 3:
+            return KDLeaf(self.all_points, triangles, False)
+
         dim = depth % self.dimensions
         median_idx = np.argpartition(points, points.shape[0] // 2, axis=0)[
             points.shape[0] // 2, dim

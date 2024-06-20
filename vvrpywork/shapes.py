@@ -2918,7 +2918,7 @@ class LineSet3D(ShapeSet):
 class Mesh3D(ShapeSet):
     '''A class used to represent a triangle mesh in 3D space.'''
 
-    def __init__(self, path:None|str=None, color:ColorType=(0, 0, 0)):
+    def __init__(self, path:None|str=None, color:ColorType=(0, 0, 0), name:None|str=None):
         '''Inits Mesh3D.
 
         Inits a Mesh3D from a specified path.
@@ -2941,6 +2941,8 @@ class Mesh3D(ShapeSet):
         if not self._shape.has_triangle_normals():
             self._shape.compute_triangle_normals()
         self.use_material = True
+        
+        self.name = name
 
     def _addToScene(self, scene:Scene3D, name:None|str):
         name = str(id(self)) if name is None else name

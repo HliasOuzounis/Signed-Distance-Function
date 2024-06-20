@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
-# from .constants import NDArrayNx3, NDArray1D, NDPoint3D
+from .constants import NDArrayNx3, NDArray1D, NDPoint3D
 
 class SDF:
     def __init__(self, grid):
@@ -15,17 +15,18 @@ class SDF:
             bounds_error=False,
             fill_value=None,
         )
-        print(signal.shape)
+        print()
+        print("Interpolator built")
 
-    # def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
-    def ray_marching(self, points, direction):
-        # points = points.copy()
+    def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
+        points = points.copy() # comment out to see where points end up in ray_marching
         intersects = np.zeros(points.shape[0], dtype=bool)
         uncertain = np.ones(points.shape[0], dtype=bool)
 
         distances = self.interpolator(points[uncertain])
 
         d = 1e-5
+        distance_limit = 1
         
         while np.any(uncertain):
             new_points = points[uncertain] + direction * distances[uncertain].reshape(-1, 1)
@@ -34,10 +35,11 @@ class SDF:
 
             intersects[uncertain] = new_distances < d
 
-            increased = new_distances > distances[uncertain]
+            # increased = new_distances > distances[uncertain]
+            outside = new_distances > distance_limit
             distances[uncertain] = new_distances
 
-            uncertain[uncertain] &= ~(increased | intersects[uncertain])
+            uncertain[uncertain] &= ~(outside | intersects[uncertain])
             
         return intersects
 
@@ -58,9 +60,12 @@ def _test():
     sdf.build(signal)
 
     p = np.vstack([xx.ravel(), yy.ravel(), zz.ravel()]).T
+    p = np.stack([xx, yy, zz], axis=-1).reshape(-1, 3)
     
     for i, j in zip(signal, f(p[:, 0], p[:, 1], p[:, 2]).reshape(23, 23, 23)):
         assert np.allclose(i, j)
+    
+    print(p[10])
 
 
 if __name__ == "__main__":
