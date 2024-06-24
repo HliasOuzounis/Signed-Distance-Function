@@ -16,7 +16,7 @@ class KDTreeConstructor(Callback):
 
         self.kdTree = KDTree(dimensions=2)
         self.iter = 0
-        self.total_iters = 7
+        self.total_iters = 10
         
         self.draw = draw
 

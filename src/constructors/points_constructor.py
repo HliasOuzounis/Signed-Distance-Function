@@ -40,9 +40,11 @@ class PointsConstructor(Callback):
             if not isinstance(sdf, SDF):
                 raise ValueError("SDF function is required for ray marching")
             self.sdf = sdf
+            
+        self.triangle_params = TriangleParams2D(self.mesh.triangles, self.mesh.vertices)
 
         self.total_points = 25000
-        self.step = 1 / 100
+        self.step = 1 / 50
 
     def animate_init(self) -> None:
         self.l = 0
@@ -86,7 +88,7 @@ class PointsConstructor(Callback):
         self.l += self.step
 
         if self.l > self.limit:
-            # self.scene.removeShape(self.non_intersecting_name)
+            self.scene.removeShape(self.non_intersecting_name)
             self.estimate_area()
             self.stop_animate()
             return True
@@ -94,7 +96,7 @@ class PointsConstructor(Callback):
         index = int(self.l * self.total_points)
 
         if self.useKDTree:
-            interecting_points = self.kd_tree.intersects_mesh(  # ~ 4 times faster
+            interecting_points = self.kd_tree.intersects_mesh(
                 self.random_points[self.prev_index : index + 1]
             )
 
@@ -103,6 +105,7 @@ class PointsConstructor(Callback):
                 self.random_points[self.prev_index : index + 1],
                 np.dot(self.rot_mat.T, np.array([0, 0, 1])),
             )
+            
 
         interecting_points_indexes = interecting_points > 0
         self.non_intersecting_points = np.concatenate(
@@ -149,10 +152,11 @@ class PointsConstructor(Callback):
         plane_area = np.linalg.norm(diag[[0, 2]]) * diag[1]
 
         print(
-            f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2"
-        )
-        print(
             f"{self.intersecting.points.shape[0]} points out of {self.prev_index} points"
+        )
+        print(f"Plane area: {plane_area:.4f}")
+        print(
+            f"Area of projection using Monte Carlo: {self.intersecting.points.shape[0] / self.prev_index * plane_area:.4f} units^2"
         )
 
     def clear(self, _sequence: SequenceHandler, scene: Scene3D) -> bool:

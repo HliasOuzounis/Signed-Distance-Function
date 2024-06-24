@@ -32,7 +32,7 @@ class Window(scene.Scene3D):
         self.sequenceHandler = SequenceHandler(self.window, self)
         self.window.set_on_key(self.sequenceHandler.perform_action)
         # self.scene_widget.look_at(np.array([0, 0, -1]), np.array([-1, 0.6, 0.7]), np.array([0, 1, 0]))
-        self.scene_widget.look_at(np.zeros(3), np.array([-1, 0.5, 1]), np.array([0, 1, 0]))
+        self.scene_widget.look_at(np.zeros(3), np.array([-1.0, 0.5, 1.0]), np.array([0, 1, 0]))
         self.init_window()
 
         self.mainLoop()
