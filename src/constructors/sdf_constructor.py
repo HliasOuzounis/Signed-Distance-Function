@@ -104,12 +104,12 @@ class SDFConstructor(Callback):
 
         grid_colors = np.zeros((inside.shape[0], 3))
         grid_colors[inside] = (
-            np.array([[0, 0, 1]]) * -
-            self.distances[self.prev_index: index + 1][inside]
+            np.array([[0, 0, 1]]) #* -
+            # self.distances[self.prev_index: index + 1][inside]
         )
         grid_colors[~inside] = (
-            np.array([[1, 0, 0]]) *
-            self.distances[self.prev_index: index + 1][~inside]
+            np.array([[1, 0, 0]]) #*
+            # self.distances[self.prev_index: index + 1][~inside]
         )
 
         grid_cloud = PointSet3D(

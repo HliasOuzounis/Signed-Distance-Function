@@ -284,17 +284,6 @@ class KDTree(Node):
     def clear(self, scene: Scene3D) -> None:
         self.troot.clear(scene)
 
-    # def get_closest_points(self, points: NDArrayNx3) -> NDArray1D:
-    #     global total_checks
-    #     points = np.dot(points, self.inv_rot_mat)
-    #     # return self.troot.get_closest_points(points)
-    #     get_closest_pointss = np.ones(points.shape[0]) * np.inf
-    #     a = self.troot.get_closest_points(points, get_closest_pointss)
-    #     if points.shape[0] > 0:
-    #         print(total_checks / points.shape[0])
-    #     total_checks = 0
-    #     return a
-
     def closest_point(self, point: NDArrayNx3) -> NDArrayNx3:
         closest_points = np.zeros((point.shape[0], 3))
         distances = np.ones(point.shape[0]) * np.inf
