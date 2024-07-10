@@ -32,8 +32,8 @@ class OutlineConstructor(Callback):
         self.points = self.pointcloud.points
         self.projected_points = np.dot(self.points, inv_rot_mat)[:, :2]
 
-        # alpha = 3e-2
-        alpha = 1
+        alpha = 3e-2
+        # alpha = 1
         self.outline_generator = alpha_shapes.get_outline(self.projected_points, alpha)
 
         for key in self.outline:

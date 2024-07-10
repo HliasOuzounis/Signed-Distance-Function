@@ -19,7 +19,7 @@ class SDF:
         print("Interpolator built")
 
     def ray_marching(self, points: NDArrayNx3, direction: NDPoint3D) -> NDArray1D:
-        # points = points.copy() # comment out to see where points end up in ray_marching
+        points = points.copy() # comment out to see where points end up in ray_marching
         intersects = np.zeros(points.shape[0], dtype=bool)
         uncertain = np.ones(points.shape[0], dtype=bool)
 

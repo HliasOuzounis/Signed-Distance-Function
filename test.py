@@ -15,10 +15,11 @@ from src.constructors import (
 from src.constructors.callback import Callback
 
 from src.utils import KDTree
+from src.utils import TriangleParams3D
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/sphere.ply", "sphere")
+mesh = shapes.Mesh3D("models/CatMesh.ply", name="cat")
 print(
     f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})"
 )
@@ -63,16 +64,9 @@ class testSDF(Callback):
     def __init__(self, mesh) -> None:
         super().__init__()
         self.mesh = mesh
-        self.kdTree3D = KDTree(dimensions=3)
+        self.params = TriangleParams3D(self.mesh.triangles, self.mesh.vertices)
 
     def animate_init(self) -> None:
-        print("Building KDTree")
-        if not self.kdTree3D.is_built:
-            self.kdTree3D.build_tree(
-                self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
-            )
-        print("Built KDTree")
-
         self.point = [1, 1, 0]
 
     def animate(self):
@@ -108,7 +102,7 @@ class testSDF(Callback):
             self.point[2] += move_step
 
         point = shapes.Point3D(self.point, color=[0, 1, 0])
-        closest_point, dist = self.kdTree3D.closest_point(np.array([self.point]))
+        closest_point, dist = self.params.get_closest_points(np.array([self.point]))
         # print(closest_point, dist)
         closest_point = shapes.Point3D(closest_point[0])
         arrow = shapes.Arrow3D(point, closest_point, color=[0.5, 1, 0.5]) 
@@ -118,7 +112,7 @@ class testSDF(Callback):
         self.scene.addShape(arrow, "arrow")
         
         center = shapes.Arrow3D(point, np.array([0, 0, 0]), color=[1, 0, 0])
-        self.scene.addShape(center, "center")
+        # self.scene.addShape(center, "center")
          
         return True
         
