@@ -25,15 +25,15 @@ class SDF:
 
         distances = self.interpolator(points[uncertain])
 
-        d = 1e-5
+        epsilon = 1e-3
         distance_limit = 1
         
         while np.any(uncertain):
-            new_points = points[uncertain] + direction * distances[uncertain].reshape(-1, 1)
+            new_points = points[uncertain] + direction * distances[uncertain].reshape(-1, 1) * 0.99
             points[uncertain] = new_points
             new_distances = self.interpolator(new_points)
 
-            intersects[uncertain] = new_distances < d
+            intersects[uncertain] = new_distances < epsilon
 
             outside = new_distances > distance_limit
             distances[uncertain] = new_distances

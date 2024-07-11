@@ -16,7 +16,7 @@ from src.constructors import (
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/CatMesh.ply", name="cat")
+mesh = shapes.Mesh3D("models/DuckMesh.ply", name="duck")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}, Vertices: {len(mesh.vertices)}")
 
@@ -78,7 +78,7 @@ class Window(scene.Scene3D):
         closest_point_constructor.next_animation = clear_closest_point
         
         # Task 7: Create SDFe function
-        sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree, load_disances=False)
+        sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree, load_disances=True)
         clear_closest_point.next_animation = sdf_constructor
         
         sphere_constructor = SphereConstructor(sdf_constructor.grid_points, sdf_constructor.distances)

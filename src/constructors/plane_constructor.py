@@ -62,6 +62,7 @@ class PlaneConstructor(Callback):
     def stop_animate(self) -> None:
         self.scene.window.set_on_key(self.handleRotation)
         self.scene.window.set_on_tick_event(None)
+        # self.scene.removeShape(self.plane_name)
     
 
     def handleRotation(self, key_event) -> None:

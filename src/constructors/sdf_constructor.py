@@ -14,7 +14,7 @@ class SDFConstructor(Callback):
         self.mesh = mesh
         self.load_disances = load_disances
 
-        self.total_points = 5**3
+        self.total_points = 30**3
         point_per_axis = int(self.total_points ** (1 / 3)) + 1
         self.total_points = point_per_axis**3
         self.step = 1 / 100
