@@ -50,6 +50,7 @@ class ClosestPointConstructor(Callback):
         if key == o3d.visualization.gui.KeyName.ENTER and action == o3d.visualization.gui.KeyEvent.DOWN:
             super().stop_animate()
             self.scene.window.set_on_key(self.sequence.perform_action)
+            self.sequence.next_animation(self.sequence, self.scene)
 
         return self.show_points()
     

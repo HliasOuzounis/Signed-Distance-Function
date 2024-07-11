@@ -65,6 +65,7 @@ class PointsConstructor(Callback):
                 rotated_plane_verts[-1],
             ),
             self.total_points,
+            seed=69
         )
 
         self.scene.addShape(self.non_intersecting, self.non_intersecting_name)
@@ -102,7 +103,6 @@ class PointsConstructor(Callback):
                 self.random_points[self.prev_index : index + 1],
                 np.dot(self.rot_mat.T, np.array([0, 0, 1])),
             )
-            
 
         interecting_points_indexes = interecting_points > 0
         self.non_intersecting_points = np.concatenate(

@@ -28,24 +28,24 @@ class SequenceHandler:
         return self._next_animation
 
     @next_animation.setter
-    def next_animation(self, next):
-        self._next_animation = next
+    def next_animation(self, next_anim):
+        self._next_animation = next_anim
 
     @property
     def curr_animation(self):
         return self._curr_animation
 
     @curr_animation.setter
-    def curr_animation(self, curr):
-        self._curr_animation = curr
+    def curr_animation(self, curr_anim):
+        self._curr_animation = curr_anim
 
     @property
     def prev_animation(self):
         return self._prev_animation
 
     @prev_animation.setter
-    def prev_animation(self, prev):
-        self._prev_animation = prev
+    def prev_animation(self, prev_anim):
+        self._prev_animation = prev_anim
 
 
 def empty_call(window, *args):

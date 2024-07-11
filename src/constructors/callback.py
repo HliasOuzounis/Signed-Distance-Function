@@ -15,11 +15,6 @@ class Callback(ABC):
         """
         The callback function that will be called when in the callback loop or when the key is pressed.
         Override if more complex functionality is needed.
-        
-        Params:
-            - window: The window that the callback is attached to
-            - key: State of the key if it was pressed
-            - action: Additional mods (ctrl, shift, etc.) if the key was pressed
         """
         self.sequence = sequence
         self.scene = scene

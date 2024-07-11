@@ -64,7 +64,7 @@ class SDFConstructor(Callback):
             except FileNotFoundError:
                 print("Distance file not found")
                 self.load_disances = False
-
+                
     @utility.show_fps
     def animate(self) -> bool:
         self.l += self.step

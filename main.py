@@ -16,7 +16,7 @@ from src.constructors import (
 
 from vvrpywork import scene, shapes
 
-mesh = shapes.Mesh3D("models/DuckMesh.ply", name="duck")
+mesh = shapes.Mesh3D("models/CatMesh.ply", name="cat")
 print(f"Mesh: self-intersecting ({mesh._shape.is_self_intersecting()}), edge-manifold ({mesh._shape.is_edge_manifold()}), vertex-manifold ({mesh._shape.is_vertex_manifold()}), watertight ({mesh._shape.is_watertight()})")
 print(f"Triangles: {len(mesh.triangles)}, Vertices: {len(mesh.vertices)}")
 
@@ -65,10 +65,12 @@ class Window(scene.Scene3D):
         # Task 3: Calculate outline of the projected points & Task 4: Calculate area of projection
         outlineConstructor = OutlineConstructor(pointsConstructor.intersecting, planeConstructor.plane)
         pointsConstructor.next_animation = outlineConstructor
-
+        clear_points = ClearCallback(pointsConstructor)
+        outlineConstructor.next_animation = clear_points
+        
         # Clear the scene for part B
-        clear_partA = ClearCallback(planeConstructor, pointsConstructor, outlineConstructor)
-        outlineConstructor.next_animation = clear_partA
+        clear_partA = ClearCallback(planeConstructor, outlineConstructor)
+        clear_points.next_animation = clear_partA
 
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
@@ -94,9 +96,11 @@ class Window(scene.Scene3D):
         # Task 8 & 9: Calculate outline of the projected points & Calculate area of projection 
         outlineConstructorB = OutlineConstructor(pointsConstructorB.intersecting, planeConstructorB.plane)
         pointsConstructorB.next_animation = outlineConstructorB
+        clear_pointsB = ClearCallback(pointsConstructorB)
+        outlineConstructorB.next_animation = clear_pointsB
 
         # skip to part B
-        meshConstructor.next_animation = closest_point_constructor
+        # meshConstructor.next_animation = closest_point_constructor
 
         # Loop part A
         # clear_partA.next_animation = planeConstructor
