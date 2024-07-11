@@ -72,10 +72,6 @@ class PlaneConstructor(Callback):
             super().stop_animate()
             self.scene.window.set_on_key(self.sequence.perform_action)
 
-        # if key == o3d.visualization.gui.KeyName.W:
-        #     self.rotate(np.array([rotate_step, 0, 0]))
-        # if key == o3d.visualization.gui.KeyName.S:
-        #     self.rotate(np.array([-rotate_step, 0, 0]))
         if key == o3d.visualization.gui.KeyName.A:
             self.rotate(np.array([0, rotate_step, 0]))
         if key == o3d.visualization.gui.KeyName.D:

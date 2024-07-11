@@ -10,10 +10,15 @@ class ClosestPointConstructor(Callback):
     def __init__(self, mesh, kdtree: KDTree) -> None:
         super().__init__()
         self.mesh = mesh
-        self.kdtree = kdtree
-        self.params = TriangleParams3D(self.mesh.triangles, self.mesh.vertices)
+        self.kdTree = kdtree
 
     def animate_init(self) -> None:
+        self.params = TriangleParams3D(self.mesh.triangles, self.mesh.vertices)
+
+        if not self.kdTree.is_built:
+            self.kdTree.build_tree(
+                self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
+            )
         self.point = [1, 1, 0]
 
     def animate(self):
@@ -49,15 +54,13 @@ class ClosestPointConstructor(Callback):
         return self.show_points()
     
     def show_points(self):
-        self.scene.removeShape("point")
-        self.scene.removeShape("closest_point")
-        self.scene.removeShape("arrow")
+        self.clear(self.sequence, self.scene)
         
-        is_inside = self.kdtree.is_inside(self.point)
+        is_inside = self.kdTree.is_inside(np.array([self.point]))
         
         closest_point, dist = self.params.get_closest_points(np.array([self.point]))
         point = Point3D(self.point, color=[0, 0, 1] * dist if is_inside else [1, 0, 0] * dist)
-        closest_point = Point3D(closest_point[0])
+        closest_point = Point3D(closest_point[0], color=[0, 1, 0])
         arrow = Arrow3D(point, closest_point, color=[0.5, 1, 0.5]) 
 
         self.scene.addShape(point, "point")

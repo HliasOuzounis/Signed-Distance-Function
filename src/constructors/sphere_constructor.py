@@ -36,7 +36,7 @@ class SphereConstructor(Callback):
         distances = self.distances[self.inside][self.prev_index: index + 1]
         points = self.grid[self.inside][self.prev_index: index + 1]
         
-        for point, dist in zip(points, distances):
+        for point, dist in zip(points[:100], distances[:100]):
             sphere = Sphere3D(point, dist[0])
             name = f"sphere_{tuple(point)}"
             # print(name)

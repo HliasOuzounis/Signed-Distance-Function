@@ -41,8 +41,6 @@ class PointsConstructor(Callback):
                 raise ValueError("SDF function is required for ray marching")
             self.sdf = sdf
             
-        self.triangle_params = TriangleParams2D(self.mesh.triangles, self.mesh.vertices)
-
         self.total_points = 25000
         self.step = 1 / 50
 
@@ -84,7 +82,6 @@ class PointsConstructor(Callback):
 
     @utility.show_fps
     def animate(self) -> bool:
-        # return self.stop_animate()
         self.l += self.step
 
         if self.l > self.limit:

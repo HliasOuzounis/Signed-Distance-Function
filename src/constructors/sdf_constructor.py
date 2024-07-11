@@ -2,7 +2,7 @@ import numpy as np
 
 from vvrpywork.shapes import PointSet3D, Mesh3D
 
-from ..utils import KDTree, SDF
+from ..utils import KDTree, SDF, TriangleParams3D
 from ..utils import utility
 
 from .callback import Callback, SequenceHandler, Scene3D
@@ -14,7 +14,7 @@ class SDFConstructor(Callback):
         self.mesh = mesh
         self.load_disances = load_disances
 
-        self.total_points = 30**3
+        self.total_points = 5**3
         point_per_axis = int(self.total_points ** (1 / 3)) + 1
         self.total_points = point_per_axis**3
         self.step = 1 / 100
@@ -44,7 +44,6 @@ class SDFConstructor(Callback):
         self.distances = np.zeros((self.total_points, 1))
 
         self.kdTree2D = kdTree2D
-        self.kdTree3D = KDTree(dimensions=3)
 
     def animate_init(self) -> None:
         self.clear(self.sequence, self.scene)
@@ -57,16 +56,13 @@ class SDFConstructor(Callback):
                 self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
             )
 
-        if not self.kdTree3D.is_built and not self.load_disances:
-            self.kdTree3D.build_tree(
-                self.mesh.vertices, self.mesh.triangles, inv_rot_mat=np.eye(3)
-            )
+        self.params = TriangleParams3D(self.mesh.triangles, self.mesh.vertices)
         
         if self.load_disances:
             try:
-                self.distances = np.load(f"models/{self.mesh.name}-{self.total_points}-distances.npy")
+                self.distances[True] = np.load(f"models/{self.mesh.name}-{self.total_points}-distances.npy")
             except FileNotFoundError:
-                print("File not found")
+                print("Distance file not found")
                 self.load_disances = False
 
     @utility.show_fps
@@ -92,24 +88,21 @@ class SDFConstructor(Callback):
         inside = self.kdTree2D.is_inside(
             self.grid_points[self.prev_index: index + 1])
 
-        # self.distances[self.prev_index: index + 1] = self.kdTree3D.min_distance(
-        #     self.grid_points[self.prev_index: index + 1]
-        # ).reshape(-1, 1)
+
         if not self.load_disances:
-            _, distances = self.kdTree3D.closest_point(self.grid_points[self.prev_index: index + 1])
+            _, distances = self.params.get_closest_points(self.grid_points[self.prev_index: index + 1])
             self.distances[self.prev_index: index + 1] = distances.reshape(-1, 1)
-            # self.distances[self.prev_index: index + 1] = np.linalg.norm(self.grid_points[self.prev_index: index + 1], axis=1).reshape(-1, 1) - 1
 
             self.distances[self.prev_index: index + 1][inside] *= -1
 
         grid_colors = np.zeros((inside.shape[0], 3))
         grid_colors[inside] = (
-            np.array([[0, 0, 1]]) #* -
-            # self.distances[self.prev_index: index + 1][inside]
+            np.array([[0, 0, 1]]) * -
+            self.distances[self.prev_index: index + 1][inside]
         )
         grid_colors[~inside] = (
-            np.array([[1, 0, 0]]) #*
-            # self.distances[self.prev_index: index + 1][~inside]
+            np.array([[1, 0, 0]]) *
+            self.distances[self.prev_index: index + 1][~inside]
         )
 
         grid_cloud = PointSet3D(

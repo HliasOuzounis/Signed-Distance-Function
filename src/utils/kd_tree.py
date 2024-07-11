@@ -32,10 +32,6 @@ class Node(ABC):
         pass
 
 
-    def get_closest_points(self, points: NDArrayNx3) -> NDArray1D:
-        pass
-
-
 class KDNode(Node):
     def __init__(self, value: NDPoint3D, line: NDArray1D) -> None:
         self.value = value
@@ -67,50 +63,6 @@ class KDNode(Node):
             )
 
         return interescts
-
-    def get_closest_points(self, points: NDArrayNx3, closest_points: NDArrayNx3, distances: NDArray1D) -> tuple[NDArrayNx3, NDArray1D]:
-        if points.shape[0] == 0:
-            return np.zeros((0, 3)), np.zeros(0) 
-
-        on_right = self.is_on_right(points)
-        
-        if self.right is not None:
-            new_closest_points, new_distances = self.right.get_closest_points(points[on_right], closest_points[on_right], distances[on_right])
-            improved = new_distances < distances[on_right]
-            changed = np.zeros_like(on_right)
-            changed[on_right] = improved
-            closest_points[changed] = new_closest_points[improved]
-            distances[changed] = new_distances[improved]
-
-
-        if self.left is not None:
-            new_closest_points, new_distances = self.left.get_closest_points(points[~on_right], closest_points[~on_right], distances[~on_right])
-            improved = new_distances < distances[~on_right]
-            changed = np.zeros_like(on_right)
-            changed[~on_right] = improved
-            closest_points[changed] = new_closest_points[improved]
-            distances[changed] = new_distances[improved]
-            
-        recheck = distances >= np.abs(self.distance_to_line(points))
-        
-        if self.right is not None:
-            new_closest_points, new_distances = self.right.get_closest_points(points[recheck & ~on_right], closest_points[recheck & ~on_right], distances[recheck & ~on_right])
-            improved = new_distances < distances[recheck & ~on_right]
-            changed = np.zeros_like(recheck)
-            changed[recheck & ~on_right] = improved
-            closest_points[changed] = new_closest_points[improved]
-            distances[changed] = new_distances[improved]
-
-        if self.left is not None:
-            new_closest_points, new_distances = self.left.get_closest_points(points[recheck & on_right], closest_points[recheck & on_right], distances[recheck & on_right])
-            improved = new_distances < distances[recheck & on_right]
-            changed = np.zeros_like(recheck)
-            changed[recheck & on_right] = improved
-            closest_points[changed] = new_closest_points[improved]
-            distances[changed] = new_distances[improved]
-        
-        return closest_points, distances
-        
 
     def is_on_right(self, points: NDArrayNx3) -> NDArray1D:
         return self.distance_to_line(points) > 0
@@ -208,11 +160,6 @@ class KDLeaf(Node):
             return np.zeros(points.shape[0])
         return self.triangles.find_intersections(points, count_intersections)
 
-    def get_closest_points(self, points: NDArrayNx3, closest_points: NDArrayNx3, distances: NDArray1D) -> tuple[NDArrayNx3, NDArray1D]:
-        if self.is_empty:
-            return closest_points, distances
-        return self.triangles.get_closest_points(points)
-
 class KDTree(Node):
     def __init__(self, dimensions: int) -> None:
         self.all_points = np.empty((0, 3))
@@ -232,9 +179,6 @@ class KDTree(Node):
     ) -> Node:
         if points.shape[0] == 0:
             return KDLeaf(self.all_points, triangles, self.dimensions == 2)
-
-        if self.dimensions == 3:
-            return KDLeaf(self.all_points, triangles, False)
 
         dim = depth % self.dimensions
         median_idx = np.argpartition(points, points.shape[0] // 2, axis=0)[

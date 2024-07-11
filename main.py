@@ -11,6 +11,7 @@ from src.constructors import (
     ClearCallback,
     SDFConstructor,
     SphereConstructor,
+    ClosestPointConstructor,
 )
 
 from vvrpywork import scene, shapes
@@ -71,9 +72,14 @@ class Window(scene.Scene3D):
 
         # Task 5: Check if point is inside or outside the mesh
         # Task 6: Calculate min distance to mesh
+        closest_point_constructor = ClosestPointConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree)
+        clear_partA.next_animation = closest_point_constructor
+        clear_closest_point = ClearCallback(closest_point_constructor)
+        closest_point_constructor.next_animation = clear_closest_point
+        
         # Task 7: Create SDFe function
-        sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree, load_disances=True)
-        clear_partA.next_animation = sdf_constructor
+        sdf_constructor = SDFConstructor(meshConstructor.mesh, kdTreeConstructor.kdTree, load_disances=False)
+        clear_closest_point.next_animation = sdf_constructor
         
         sphere_constructor = SphereConstructor(sdf_constructor.grid_points, sdf_constructor.distances)
         sdf_constructor.next_animation = sphere_constructor
@@ -90,7 +96,7 @@ class Window(scene.Scene3D):
         pointsConstructorB.next_animation = outlineConstructorB
 
         # skip to part B
-        meshConstructor.next_animation = sdf_constructor
+        meshConstructor.next_animation = closest_point_constructor
 
         # Loop part A
         # clear_partA.next_animation = planeConstructor

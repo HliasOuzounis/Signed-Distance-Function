@@ -39,7 +39,7 @@ class SDF:
             distances[uncertain] = new_distances
 
             uncertain[uncertain] &= ~(outside | intersects[uncertain])
-            
+         
         return intersects
 
 

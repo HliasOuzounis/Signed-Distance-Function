@@ -6,31 +6,6 @@ from .constants import NDArrayNx3, NDArray1D, NDPoint3D, Matrix3x3, NDArray, NDP
 from .utility import rotation_matrix_from_vectors
 
 
-def rotation_matrix_from_vectors(vec1: NDPoint3D, vec2: NDPoint3D) -> Matrix3x3:
-    """
-    Find the rotation matrix that aligns vec1 to vec2
-
-    Parameters:
-    - vec1: A 3d "source" vector
-    - vec2: A 3d "destination" vector
-
-    Returns
-    - mat: A transform matrix (3x3) which when applied to vec1, aligns it with vec2.
-    """
-    if np.allclose(vec1, vec2):
-        return np.eye(3)
-
-    a, b = (vec1 / np.linalg.norm(vec1)).reshape(3), (
-        vec2 / np.linalg.norm(vec2)
-    ).reshape(3)
-    v = np.cross(a, b)
-    c = np.dot(a, b)
-    s = np.linalg.norm(v)
-    kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-    rotation_matrix = np.eye(3) + kmat + kmat.dot(kmat) * ((1 - c) / (s**2))
-    return rotation_matrix
-
-
 class TriangleParams:
     def __init__(self, v1: NDArrayNx3, v2: NDArrayNx3, v3: NDArrayNx3) -> None:
         self.v0, self.v1, self.v2 = v1, v2, v3
@@ -144,11 +119,11 @@ class TriangleParams3D(TriangleParams):
         closest_points = np.zeros((points.shape[0], 3))
         distances = np.zeros(points.shape[0])
         for i, (point, pu, pv, pw) in enumerate(zip(points, u, v, w)):
-            closest_points[i], distances[i] = self.find_closest_points(point, pu, pv, pw)
-            
+            closest_points[i], distances[i] = self.find_closest_point(point, pu, pv, pw)
+
         return closest_points, distances
 
-    def find_closest_points(
+    def find_closest_point(
         self, point: NDPoint3D, u: NDArray, v: NDArray, w: NDArray
     ) -> tuple[NDArrayNx3, NDArray1D]:
         u_neg = u < 0
@@ -166,79 +141,63 @@ class TriangleParams3D(TriangleParams):
                 + self.og_v2[inside] * w[inside][:, None]
             )
             distances[inside] = np.linalg.norm(closest_points[inside] - point, axis=1)
-            
-        banned = np.zeros_like(u_neg, dtype=bool) 
+
+        excluded = np.zeros_like(u_neg, dtype=bool)
 
         if (u_neg & v_neg).any():
             new_points = self.og_v2[u_neg & v_neg]
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[u_neg & v_neg] > new_distances
-            changed = np.zeros_like(u_neg, dtype=bool)
-            changed[u_neg & v_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
-            
-            banned |= (u_neg & v_neg)
-            
+            self._find_improvements(point, new_points, distances, closest_points, u_neg & v_neg)
+            excluded |= u_neg & v_neg
+
         if (u_neg & w_neg).any():
             new_points = self.og_v1[u_neg & w_neg]
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[u_neg & w_neg] > new_distances
-            changed = np.zeros_like(u_neg, dtype=bool)
-            changed[u_neg & w_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
-            banned |= (u_neg & w_neg)
+            self._find_improvements(point, new_points, distances, closest_points, u_neg & w_neg)
+            excluded |= u_neg & w_neg
 
         if (v_neg & w_neg).any():
             new_points = self.og_v0[v_neg & w_neg]
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[v_neg & w_neg] > new_distances
-            changed = np.zeros_like(v_neg, dtype=bool)
-            changed[v_neg & w_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
-            banned |= (v_neg & w_neg)
-            
-        u_neg &= ~banned
-        v_neg &= ~banned
-        w_neg &= ~banned
+            self._find_improvements(point, new_points, distances, closest_points, v_neg & w_neg)
+            excluded |= v_neg & w_neg
+
+        u_neg &= ~excluded
+        v_neg &= ~excluded
+        w_neg &= ~excluded
 
         if u_neg.any():
-            new_points = (self.og_v1[u_neg] * v[u_neg][:, None] + self.og_v2[u_neg] * w[u_neg][:, None]) / (1 - u[u_neg][:, None])
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[u_neg] > new_distances
-            changed = np.zeros_like(u_neg, dtype=bool)
-            changed[u_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
+            new_points = (
+                self.og_v1[u_neg] * v[u_neg][:, None]
+                + self.og_v2[u_neg] * w[u_neg][:, None]
+            ) / (1 - u[u_neg][:, None])
+            self._find_improvements(point, new_points, distances, closest_points, u_neg)
 
         if v_neg.any():
-            new_points = (self.og_v0[v_neg] * u[v_neg][:, None] + self.og_v2[v_neg] * w[v_neg][:, None]) / (1 - v[v_neg][:, None])
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[v_neg] > new_distances
-            changed = np.zeros_like(v_neg, dtype=bool)
-            changed[v_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
+            new_points = (
+                self.og_v0[v_neg] * u[v_neg][:, None]
+                + self.og_v2[v_neg] * w[v_neg][:, None]
+            ) / (1 - v[v_neg][:, None])
+            self._find_improvements(point, new_points, distances, closest_points, v_neg)
 
         if w_neg.any():
-            new_points = (self.og_v0[w_neg] * u[w_neg][:, None] + self.og_v1[w_neg] * v[w_neg][:, None]) / (1 - w[w_neg][:, None])
-            new_distances = np.linalg.norm(new_points - point, axis=1)
-            improved = distances[w_neg] > new_distances
-            changed = np.zeros_like(w_neg, dtype=bool)
-            changed[w_neg] = improved
-            closest_points[changed] = new_points[improved]
-            distances[changed] = new_distances[improved]
+            new_points = (
+                self.og_v0[w_neg] * u[w_neg][:, None]
+                + self.og_v1[w_neg] * v[w_neg][:, None]
+            ) / (1 - w[w_neg][:, None])
+            self._find_improvements(point, new_points, distances, closest_points, w_neg)
 
         min_dist = np.argmin(distances)
-        
-        # print("------------------------")
-        # print(distances[min_dist], self.og_v0[min_dist], self.og_v1[min_dist], self.og_v2[min_dist])
-        # print(u[min_dist], v[min_dist], w[min_dist])
-        # print(point, closest_points[min_dist])
-        
+
         return closest_points[min_dist], distances[min_dist]
+
+    def _find_improvements(
+        self, point, new_points, distances, closest_points, array_filter
+    ):
+        new_distances = np.linalg.norm(new_points - point, axis=1)
+        improved = distances[array_filter] > new_distances
+        changed = np.zeros_like(array_filter, dtype=bool)
+        changed[array_filter] = improved
+
+        closest_points[changed] = new_points[improved]
+        distances[changed] = new_distances[improved]
 
     def _rotation_matrix(self, n: NDPoint3D) -> Matrix3x3:
         return rotation_matrix_from_vectors(n, [0, 0, 1])

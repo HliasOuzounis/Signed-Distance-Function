@@ -6,3 +6,4 @@ from .outline_constructor import OutlineConstructor
 from .clear_callback import ClearCallback
 from .sdf_constructor import SDFConstructor
 from .sphere_constructor import SphereConstructor
+from .closest_point_constructor import ClosestPointConstructor
